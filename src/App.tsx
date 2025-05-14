@@ -16,15 +16,29 @@ export function App() {
         itemHeight={30}
         height={400}
         width={400}
-        itemRenderer={(data) => <ListItem>{data.label}</ListItem>}
+        itemRenderer={({ data, isSticky }) => (
+          <ListItem isSticky={isSticky}>{data.label}</ListItem>
+        )}
+        stickyRowCount={3}
       />
     </div>
   );
 }
-
-function ListItem({ children }: { children: React.ReactNode }) {
+interface ListItemProps {
+  children: React.ReactNode;
+  isSticky: boolean;
+}
+function ListItem({ isSticky, children }: ListItemProps) {
   return (
-    <div style={{ width: "100%", height: "100%", border: "1px solid #999" }}>
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        border: "1px solid #999",
+        background: isSticky ? "#888" : "white",
+        boxSizing: "border-box",
+      }}
+    >
       {children}
     </div>
   );

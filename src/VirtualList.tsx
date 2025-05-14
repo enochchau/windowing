@@ -12,24 +12,27 @@ export interface VirtualListProps<T> {
   height: number;
   itemHeight: number;
   itemData: ListItemData<T>[];
-  itemRenderer: (data: T) => ReactNode;
+  itemRenderer: (args: {
+    index: number;
+    data: T;
+    id: React.Key;
+    isSticky: boolean;
+  }) => ReactNode;
+  stickyRowCount?: number;
 }
 export function VirtualList<T>(props: VirtualListProps<T>) {
   const outerDimension = {
     height: props.height,
     width: props.width,
   };
-  const { itemHeight, itemData, overflowCount, itemRenderer } = props;
+  const { stickyRowCount, itemHeight, itemData, overflowCount, itemRenderer } =
+    props;
 
   const outerRef = useRef<HTMLDivElement>(null);
-  const [visibleIndex, setVisibleIndex] = useState<{
-    start: number;
-    end: number;
-  }>({
+  const [visibleIndex, setVisibleIndex] = useState({
     start: 0,
     end: Math.floor(outerDimension.height / itemHeight) + overflowCount,
   });
-
   const innerDivHeight = itemHeight * itemData.length;
 
   const onInnerScroll: React.UIEventHandler<HTMLDivElement> = (e) => {
@@ -49,6 +52,12 @@ export function VirtualList<T>(props: VirtualListProps<T>) {
     i <= Math.min(itemData.length - 1, visibleIndex.end + overflowCount);
     i++
   ) {
+    if (typeof stickyRowCount === "number") {
+      if (i >= 0 && i < stickyRowCount) {
+        continue;
+      }
+    }
+
     const data = itemData[i];
 
     items.push(
@@ -63,9 +72,32 @@ export function VirtualList<T>(props: VirtualListProps<T>) {
           overflow: "hidden",
         }}
       >
-        {itemRenderer(data.data)}
+        {itemRenderer({ ...itemData[i], isSticky: false, index: i })}
       </div>
     );
+  }
+
+  const stickyItems: ReactNode[] = [];
+  if (typeof stickyRowCount === "number") {
+    for (let i = 0; i < stickyRowCount; i++) {
+      const data = itemData[i];
+      stickyItems.push(
+        <div
+          key={data.id}
+          style={{
+            height: itemHeight,
+            width: "100%",
+            position: "sticky",
+            left: 0,
+            top: i * itemHeight,
+            overflow: "hidden",
+            zIndex: 99,
+          }}
+        >
+          {itemRenderer({ ...itemData[i], isSticky: true, index: i })}
+        </div>
+      );
+    }
   }
 
   return (
@@ -75,6 +107,7 @@ export function VirtualList<T>(props: VirtualListProps<T>) {
       onScroll={onInnerScroll}
     >
       <div style={{ position: "relative", height: innerDivHeight }}>
+        {stickyItems}
         {items}
       </div>
     </div>
