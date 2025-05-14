@@ -25,7 +25,7 @@ export function App() {
 function ListItem({ children }: { children: React.ReactNode }) {
   return (
     <div style={{ width: "100%", height: "100%", border: "1px solid #999" }}>
-      <p>{children}</p>
+      {children}
     </div>
   );
 }
