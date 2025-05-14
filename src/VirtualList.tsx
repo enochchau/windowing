@@ -22,7 +22,6 @@ export function VirtualList<T>(props: VirtualListProps<T>) {
   const { itemHeight, itemData, overflowCount, itemRenderer } = props;
 
   const outerRef = useRef<HTMLDivElement>(null);
-  const innerRef = useRef<HTMLDivElement>(null);
   const [visibleIndex, setVisibleIndex] = useState<{
     start: number;
     end: number;
@@ -51,6 +50,7 @@ export function VirtualList<T>(props: VirtualListProps<T>) {
     i++
   ) {
     const data = itemData[i];
+
     items.push(
       <div
         key={data.id}
@@ -60,6 +60,7 @@ export function VirtualList<T>(props: VirtualListProps<T>) {
           position: "absolute",
           left: 0,
           top: i * itemHeight,
+          overflow: "hidden",
         }}
       >
         {itemRenderer(data.data)}
@@ -73,10 +74,7 @@ export function VirtualList<T>(props: VirtualListProps<T>) {
       ref={outerRef}
       onScroll={onInnerScroll}
     >
-      <div
-        style={{ position: "relative", height: innerDivHeight }}
-        ref={innerRef}
-      >
+      <div style={{ position: "relative", height: innerDivHeight }}>
         {items}
       </div>
     </div>
