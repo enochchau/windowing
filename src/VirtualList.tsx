@@ -1,31 +1,21 @@
 import { useRef, useState, type ReactNode } from "react";
 import "./App.css";
 
-export type ListItemData<T> = {
-  id: React.Key;
-  data: T;
-};
-
-export interface VirtualListProps<T> {
+export interface VirtualListProps {
   overflowCount: number;
   width: number;
+  itemCount: number;
   height: number;
   itemHeight: number;
-  itemData: ListItemData<T>[];
-  itemRenderer: (args: {
-    index: number;
-    data: T;
-    id: React.Key;
-    isSticky: boolean;
-  }) => ReactNode;
+  itemRenderer: (args: { index: number; isSticky: boolean }) => ReactNode;
   stickyRowCount?: number;
 }
-export function VirtualList<T>(props: VirtualListProps<T>) {
+export function VirtualList(props: VirtualListProps) {
   const outerDimension = {
     height: props.height,
     width: props.width,
   };
-  const { stickyRowCount, itemHeight, itemData, overflowCount, itemRenderer } =
+  const { itemCount, stickyRowCount, itemHeight, overflowCount, itemRenderer } =
     props;
 
   const outerRef = useRef<HTMLDivElement>(null);
@@ -33,7 +23,7 @@ export function VirtualList<T>(props: VirtualListProps<T>) {
     start: 0,
     end: Math.floor(outerDimension.height / itemHeight) + overflowCount,
   });
-  const innerDivHeight = itemHeight * itemData.length;
+  const innerDivHeight = itemHeight * itemCount;
 
   const onInnerScroll: React.UIEventHandler<HTMLDivElement> = (e) => {
     const outerEl = e.currentTarget;
@@ -49,7 +39,7 @@ export function VirtualList<T>(props: VirtualListProps<T>) {
 
   for (
     let i = Math.max(0, visibleIndex.start - overflowCount);
-    i <= Math.min(itemData.length - 1, visibleIndex.end + overflowCount);
+    i <= Math.min(itemCount - 1, visibleIndex.end + overflowCount);
     i++
   ) {
     if (typeof stickyRowCount === "number") {
@@ -58,11 +48,9 @@ export function VirtualList<T>(props: VirtualListProps<T>) {
       }
     }
 
-    const data = itemData[i];
-
     items.push(
       <div
-        key={data.id}
+        key={i}
         style={{
           height: itemHeight,
           width: "100%",
@@ -72,7 +60,7 @@ export function VirtualList<T>(props: VirtualListProps<T>) {
           overflow: "hidden",
         }}
       >
-        {itemRenderer({ ...itemData[i], isSticky: false, index: i })}
+        {itemRenderer({ isSticky: false, index: i })}
       </div>
     );
   }
@@ -80,10 +68,9 @@ export function VirtualList<T>(props: VirtualListProps<T>) {
   const stickyItems: ReactNode[] = [];
   if (typeof stickyRowCount === "number") {
     for (let i = 0; i < stickyRowCount; i++) {
-      const data = itemData[i];
       stickyItems.push(
         <div
-          key={data.id}
+          key={i}
           style={{
             height: itemHeight,
             width: "100%",
@@ -94,7 +81,7 @@ export function VirtualList<T>(props: VirtualListProps<T>) {
             zIndex: 99,
           }}
         >
-          {itemRenderer({ ...itemData[i], isSticky: true, index: i })}
+          {itemRenderer({ isSticky: true, index: i })}
         </div>
       );
     }

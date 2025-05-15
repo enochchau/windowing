@@ -46,7 +46,6 @@ export function VirtualGrid(props: VirtualGridProps) {
     col: { start: 0, end: Math.floor(outerDimension.width / columnWidth) },
     row: { start: 0, end: Math.floor(outerDimension.height / rowHeight) },
   });
-  console.log("initial", visibleIndex);
 
   const innerDimension = {
     width: columnCount * columnWidth,
@@ -133,6 +132,7 @@ export function VirtualGrid(props: VirtualGridProps) {
     }
   }
 
+  const stickyColumnTop = stickyRowCount * rowHeight;
   const stickyColumns: ReactNode[] = [];
   for (let rowI = rowStart; rowI <= rowEnd; rowI++) {
     for (let colJ = 0; colJ < stickyColumnCount; colJ++) {
@@ -146,7 +146,7 @@ export function VirtualGrid(props: VirtualGridProps) {
             width: columnWidth,
             height: rowHeight,
             position: "absolute",
-            top: rowI * rowHeight - stickyRowCount * rowHeight,
+            top: rowI * rowHeight - stickyColumnTop,
             left: colJ * columnWidth,
           }}
         >
@@ -160,6 +160,8 @@ export function VirtualGrid(props: VirtualGridProps) {
     }
   }
 
+
+  const stickyRowLeft = stickyColumnCount * columnWidth;
   const stickyRows: ReactNode[] = [];
   for (let rowI = 0; rowI < stickyRowCount; rowI++) {
     for (let colJ = colStart; colJ <= colEnd; colJ++) {
@@ -174,7 +176,7 @@ export function VirtualGrid(props: VirtualGridProps) {
             height: rowHeight,
             position: "absolute",
             top: rowI * rowHeight,
-            left: colJ * columnWidth - stickyColumnCount * columnWidth,
+            left: colJ * columnWidth - stickyRowLeft
           }}
         >
           {itemRenderer({
@@ -186,9 +188,6 @@ export function VirtualGrid(props: VirtualGridProps) {
       );
     }
   }
-
-  const stickyColumnTop = stickyRowCount * rowHeight;
-  const stickyRowLeft = stickyColumnCount * columnWidth;
   return (
     <div
       style={{ ...outerDimension, overflow: "auto" }}

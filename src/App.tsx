@@ -1,12 +1,7 @@
 import { VirtualGrid } from "./VirtualGrid";
 import { VirtualList } from "./VirtualList";
 
-const itemData = Array.from({ length: 1000 }, (_, i) => ({
-  id: i,
-  data: {
-    label: `Item ${i + 1}`,
-  },
-}));
+const itemData = Array.from({ length: 1000 }, (_, i) => `I ${i}`);
 
 const rows = 100;
 const cols = 100;
@@ -24,33 +19,35 @@ export function App() {
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
       <div style={{ outline: "1px solid #999" }}>
         <VirtualList
-          itemData={itemData}
+          itemCount={itemData.length}
           overflowCount={3}
           itemHeight={30}
           height={400}
-          width={400}
-          itemRenderer={({ data, isSticky }) => (
-            <ListItem isSticky={isSticky}>{data.label}</ListItem>
+          width={600}
+          itemRenderer={({ index, isSticky }) => (
+            <ListItem isSticky={isSticky}>{itemData[index]}</ListItem>
           )}
           stickyRowCount={3}
         />
       </div>
-      <VirtualGrid
-        height={800}
-        width={600}
-        columnWidth={100}
-        columnCount={100}
-        rowCount={100}
-        rowHeight={30}
-        overflowCount={3}
-        stickyRowCount={2}
-        stickyColumnCount={2}
-        itemRenderer={({ rowIndex, columnIndex, isSticky }) => (
-          <ListItem isSticky={isSticky}>
-            {cellData[rowIndex][columnIndex]}
-          </ListItem>
-        )}
-      />
+      <div style={{ outline: "1px solid #999" }}>
+        <VirtualGrid
+          height={400}
+          width={600}
+          columnWidth={100}
+          columnCount={100}
+          rowCount={100}
+          rowHeight={30}
+          overflowCount={3}
+          stickyRowCount={2}
+          stickyColumnCount={2}
+          itemRenderer={({ rowIndex, columnIndex, isSticky }) => (
+            <ListItem isSticky={isSticky}>
+              {cellData[rowIndex][columnIndex]}
+            </ListItem>
+          )}
+        />
+      </div>
     </div>
   );
 }
