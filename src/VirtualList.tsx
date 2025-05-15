@@ -1,6 +1,6 @@
-import { useRef, useState, type ReactNode } from "react";
-import { createIndexToPlacement, createPlacementToIndex, numberOrFnToFn, sum } from "./util";
+import { useState, type ReactNode } from "react";
 import type { NumberOrNumberFn } from "./types";
+import { usePlacer } from "./usePlacer";
 
 export interface VirtualListProps {
   overflowCount: number;
@@ -18,30 +18,24 @@ export function VirtualList(props: VirtualListProps) {
   };
   const { itemCount, stickyRowCount, overflowCount, itemRenderer } = props;
 
-  const getItemHeight = numberOrFnToFn(props.itemHeight)
+  const {
+    placer,
+    dimensions: itemHeights,
+    sum: innerDivHeight,
+  } = usePlacer(props.itemHeight, itemCount);
 
-  const itemHeights: number[] = [];
-  for (let i = 0; i < itemCount; i++) {
-    itemHeights.push(getItemHeight(i));
-  }
-  const dimensionToIndex = createPlacementToIndex(itemHeights)
-  const indexToDimension = createIndexToPlacement(itemHeights)
-
-  const outerRef = useRef<HTMLDivElement>(null);
   const [visibleIndex, setVisibleIndex] = useState({
     start: 0,
-    end:
-      dimensionToIndex(outerDimension.height) + overflowCount,
+    end: placer.placementToIndex(outerDimension.height) + overflowCount,
   });
-  const innerDivHeight = sum(itemHeights);
 
   const onInnerScroll: React.UIEventHandler<HTMLDivElement> = (e) => {
     const outerEl = e.currentTarget;
     const top = outerEl.scrollTop;
     const bottom = top + e.currentTarget.clientHeight;
 
-    const start = dimensionToIndex(top);
-    const end = dimensionToIndex(bottom);
+    const start = placer.placementToIndex(top);
+    const end = placer.placementToIndex(bottom);
     setVisibleIndex({ start, end });
   };
 
@@ -62,12 +56,11 @@ export function VirtualList(props: VirtualListProps) {
       <div
         key={i}
         style={{
-          height: getItemHeight(i),
+          height: itemHeights[i],
           width: "100%",
           position: "absolute",
           left: 0,
-          top: indexToDimension(i),
-          overflow: "hidden",
+          top: placer.indexToPlacement(i),
         }}
       >
         {itemRenderer({ isSticky: false, index: i })}
@@ -82,12 +75,11 @@ export function VirtualList(props: VirtualListProps) {
         <div
           key={i}
           style={{
-            height: getItemHeight(i),
+            height: itemHeights[i],
             width: "100%",
             position: "sticky",
             left: 0,
-            top: indexToDimension(i),
-            overflow: "hidden",
+            top: placer.placementToIndex(i),
             zIndex: 2,
           }}
         >
@@ -100,7 +92,6 @@ export function VirtualList(props: VirtualListProps) {
   return (
     <div
       style={{ ...outerDimension, overflow: "auto" }}
-      ref={outerRef}
       onScroll={onInnerScroll}
     >
       <div style={{ position: "relative", height: innerDivHeight }}>
