@@ -1,5 +1,5 @@
 import { useRef, useState, type ReactNode } from "react";
-import { dimensionToIndex, indexToDimension, numberOrFnToFn, sum } from "./util";
+import { createIndexToPlacement, createPlacementToIndex, numberOrFnToFn, sum } from "./util";
 import type { NumberOrNumberFn } from "./types";
 
 export interface VirtualListProps {
@@ -24,12 +24,14 @@ export function VirtualList(props: VirtualListProps) {
   for (let i = 0; i < itemCount; i++) {
     itemHeights.push(getItemHeight(i));
   }
+  const dimensionToIndex = createPlacementToIndex(itemHeights)
+  const indexToDimension = createIndexToPlacement(itemHeights)
 
   const outerRef = useRef<HTMLDivElement>(null);
   const [visibleIndex, setVisibleIndex] = useState({
     start: 0,
     end:
-      dimensionToIndex(outerDimension.height, itemHeights) + overflowCount,
+      dimensionToIndex(outerDimension.height) + overflowCount,
   });
   const innerDivHeight = sum(itemHeights);
 
@@ -38,8 +40,8 @@ export function VirtualList(props: VirtualListProps) {
     const top = outerEl.scrollTop;
     const bottom = top + e.currentTarget.clientHeight;
 
-    const start = dimensionToIndex(top, itemHeights);
-    const end = dimensionToIndex(bottom, itemHeights);
+    const start = dimensionToIndex(top);
+    const end = dimensionToIndex(bottom);
     setVisibleIndex({ start, end });
   };
 
@@ -64,7 +66,7 @@ export function VirtualList(props: VirtualListProps) {
           width: "100%",
           position: "absolute",
           left: 0,
-          top: indexToDimension(i, itemHeights),
+          top: indexToDimension(i),
           overflow: "hidden",
         }}
       >
@@ -84,7 +86,7 @@ export function VirtualList(props: VirtualListProps) {
             width: "100%",
             position: "sticky",
             left: 0,
-            top: indexToDimension(i, itemHeights),
+            top: indexToDimension(i),
             overflow: "hidden",
             zIndex: 2,
           }}

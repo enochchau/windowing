@@ -1,8 +1,8 @@
 import { useRef, useState, type ReactNode } from "react";
 import type { NumberOrNumberFn } from "./types";
 import {
-  dimensionToIndex,
-  indexToDimension,
+  createIndexToPlacement,
+  createPlacementToIndex,
   numberOrFnToFn,
   sum,
 } from "./util";
@@ -68,13 +68,18 @@ export function VirtualGrid(props: VirtualGridProps) {
     rowHeights.push(getRowHeight(i));
   }
 
+  const rowPlacementToIndex = createPlacementToIndex(rowHeights);
+  const columnPlacementToIndex = createPlacementToIndex(columnWidths);
+  const columnIndexToPlacement = createIndexToPlacement(columnWidths);
+  const rowIndexToPlacement = createIndexToPlacement(rowHeights);
+
   const outerRef = useRef<HTMLDivElement>(null);
   const [visibleIndex, setVisibleIndex] = useState({
     col: {
       start: 0,
-      end: dimensionToIndex(outerDimension.width, columnWidths),
+      end: columnPlacementToIndex(outerDimension.width),
     },
-    row: { start: 0, end: dimensionToIndex(outerDimension.height, rowHeights) },
+    row: { start: 0, end: rowPlacementToIndex(outerDimension.height) },
   });
   const [mouseOverIndex, setMouseOverIndex] = useState<{
     row: number;
@@ -94,12 +99,12 @@ export function VirtualGrid(props: VirtualGridProps) {
     const right = left + outerEl.clientWidth;
 
     const row = {
-      start: dimensionToIndex(top, rowHeights),
-      end: dimensionToIndex(bottom, rowHeights),
+      start: rowPlacementToIndex(top),
+      end: rowPlacementToIndex(bottom),
     };
     const col = {
-      start: dimensionToIndex(left, columnWidths),
-      end: dimensionToIndex(right, columnWidths),
+      start: columnPlacementToIndex(left),
+      end: columnPlacementToIndex(right),
     };
     setVisibleIndex({ row: row, col: col });
   };
@@ -138,8 +143,8 @@ export function VirtualGrid(props: VirtualGridProps) {
             width: getColumnWidth(colJ),
             height: getRowHeight(rowI),
             position: "absolute",
-            top: indexToDimension(rowI, rowHeights),
-            left: indexToDimension(colJ, columnWidths),
+            top: rowIndexToPlacement(rowI),
+            left: columnIndexToPlacement(colJ),
           }}
         >
           {itemRenderer({
@@ -185,8 +190,8 @@ export function VirtualGrid(props: VirtualGridProps) {
             width: getColumnWidth(colJ),
             height: getRowHeight(rowI),
             position: "absolute",
-            top: indexToDimension(rowI, rowHeights),
-            left: indexToDimension(colJ, columnWidths),
+            top: rowIndexToPlacement(rowI),
+            left: columnIndexToPlacement(colJ),
           }}
         >
           {itemRenderer({
@@ -200,7 +205,7 @@ export function VirtualGrid(props: VirtualGridProps) {
     }
   }
 
-  const stickyColumnTop = indexToDimension(stickyRowCount, rowHeights);
+  const stickyColumnTop = rowIndexToPlacement(stickyRowCount);
   const stickyColumns: ReactNode[] = [];
   for (let rowI = rowStart; rowI <= rowEnd; rowI++) {
     for (let colJ = 0; colJ < stickyColumnCount; colJ++) {
@@ -222,8 +227,8 @@ export function VirtualGrid(props: VirtualGridProps) {
             width: getColumnWidth(colJ),
             height: getRowHeight(rowI),
             position: "absolute",
-            top: indexToDimension(rowI, rowHeights) - stickyColumnTop,
-            left: indexToDimension(colJ, columnWidths),
+            top: rowIndexToPlacement(rowI) - stickyColumnTop,
+            left: columnIndexToPlacement(colJ),
           }}
         >
           {itemRenderer({
@@ -237,7 +242,7 @@ export function VirtualGrid(props: VirtualGridProps) {
     }
   }
 
-  const stickyRowLeft = indexToDimension(stickyColumnCount, columnWidths);
+  const stickyRowLeft = columnIndexToPlacement(stickyColumnCount);
   const stickyRows: ReactNode[] = [];
   for (let rowI = 0; rowI < stickyRowCount; rowI++) {
     for (let colJ = colStart; colJ <= colEnd; colJ++) {
@@ -259,8 +264,8 @@ export function VirtualGrid(props: VirtualGridProps) {
             width: getColumnWidth(colJ),
             height: getRowHeight(rowI),
             position: "absolute",
-            top: indexToDimension(rowI, rowHeights),
-            left: indexToDimension(colJ, columnWidths) - stickyRowLeft,
+            top: rowIndexToPlacement(rowI),
+            left: columnIndexToPlacement(colJ) - stickyRowLeft,
           }}
         >
           {itemRenderer({
