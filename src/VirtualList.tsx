@@ -1,5 +1,4 @@
 import { useRef, useState, type ReactNode } from "react";
-import "./App.css";
 
 export interface VirtualListProps {
   overflowCount: number;

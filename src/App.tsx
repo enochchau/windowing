@@ -1,10 +1,12 @@
 import { VirtualGrid } from "./VirtualGrid";
+import css from "./App.module.css";
 import { VirtualList } from "./VirtualList";
+import { classNames } from "./classnames";
 
 const itemData = Array.from({ length: 1000 }, (_, i) => `I ${i}`);
 
-const rows = 100;
-const cols = 100;
+const rows = 1000;
+const cols = 1000;
 const cellData: string[][] = [];
 
 for (let i = 0; i < rows; i++) {
@@ -16,8 +18,8 @@ for (let i = 0; i < rows; i++) {
 
 export function App() {
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-      <div style={{ outline: "1px solid #999" }}>
+    <div className={css["app-container"]}>
+      <div>
         <VirtualList
           itemCount={itemData.length}
           overflowCount={3}
@@ -30,7 +32,7 @@ export function App() {
           stickyRowCount={3}
         />
       </div>
-      <div style={{ outline: "1px solid #999" }}>
+      <div>
         <VirtualGrid
           height={400}
           width={600}
@@ -41,8 +43,10 @@ export function App() {
           overflowCount={3}
           stickyRowCount={2}
           stickyColumnCount={2}
-          itemRenderer={({ rowIndex, columnIndex, isSticky }) => (
-            <ListItem isSticky={isSticky}>
+          rowHover
+          columnHover
+          itemRenderer={({ isHovering, rowIndex, columnIndex, isSticky }) => (
+            <ListItem isSticky={isSticky} isHovering={isHovering}>
               {cellData[rowIndex][columnIndex]}
             </ListItem>
           )}
@@ -54,17 +58,16 @@ export function App() {
 interface ListItemProps {
   children: React.ReactNode;
   isSticky: boolean;
+  isHovering?: boolean;
 }
-function ListItem({ isSticky, children }: ListItemProps) {
+function ListItem({ isHovering, isSticky, children }: ListItemProps) {
   return (
     <div
-      style={{
-        width: "100%",
-        height: "100%",
-        border: "1px solid #999",
-        background: isSticky ? "#888" : "white",
-        boxSizing: "border-box",
-      }}
+      className={classNames({
+        [css["list-item"]]: true,
+        [css["list-item-sticky"]]: isSticky,
+        [css["list-item-hovering"]]: !!isHovering,
+      })}
     >
       {children}
     </div>

@@ -17,6 +17,7 @@ export interface VirtualGridProps {
 
   overflowCount: number;
   itemRenderer: (args: {
+    isHovering: boolean;
     isSticky: boolean;
     rowIndex: number;
     columnIndex: number;
@@ -24,6 +25,9 @@ export interface VirtualGridProps {
 
   stickyRowCount?: number;
   stickyColumnCount?: number;
+
+  rowHover?: boolean;
+  columnHover?: boolean;
 }
 export function VirtualGrid(props: VirtualGridProps) {
   const outerDimension = {
@@ -39,6 +43,8 @@ export function VirtualGrid(props: VirtualGridProps) {
     itemRenderer,
     stickyColumnCount = 0,
     stickyRowCount = 0,
+    rowHover = false,
+    columnHover = false,
   } = props;
 
   const outerRef = useRef<HTMLDivElement>(null);
@@ -46,6 +52,10 @@ export function VirtualGrid(props: VirtualGridProps) {
     col: { start: 0, end: Math.floor(outerDimension.width / columnWidth) },
     row: { start: 0, end: Math.floor(outerDimension.height / rowHeight) },
   });
+  const [mouseOverIndex, setMouseOverIndex] = useState<{
+    row: number;
+    column: number;
+  } | null>(null);
 
   const innerDimension = {
     width: columnCount * columnWidth,
@@ -88,9 +98,18 @@ export function VirtualGrid(props: VirtualGridProps) {
         continue;
       }
 
+      const isHovering = checkHovering({
+        colJ,
+        rowI,
+        rowHover,
+        columnHover,
+        mouseOverIndex,
+      });
+
       items.push(
         <div
           key={`${rowI}:${colJ}`}
+          onMouseEnter={() => handleItemMouseEnter({ column: colJ, row: rowI })}
           style={{
             width: columnWidth,
             height: rowHeight,
@@ -99,11 +118,25 @@ export function VirtualGrid(props: VirtualGridProps) {
             left: colJ * columnWidth,
           }}
         >
-          {itemRenderer({ isSticky: false, rowIndex: rowI, columnIndex: colJ })}
+          {itemRenderer({
+            isHovering,
+            isSticky: false,
+            rowIndex: rowI,
+            columnIndex: colJ,
+          })}
         </div>
       );
     }
   }
+
+  const handleItemMouseEnter = (args: { row: number; column: number }) => {
+    if (!rowHover && !columnHover) return;
+    setMouseOverIndex(args);
+  };
+
+  const onMouseLeaveOuterEl = () => {
+    setMouseOverIndex(null);
+  };
 
   const placed = new Set<string>();
   const stickyItems: ReactNode[] = [];
@@ -111,8 +144,18 @@ export function VirtualGrid(props: VirtualGridProps) {
     for (let colJ = 0; colJ < stickyColumnCount; colJ++) {
       const key = `${rowI}:${colJ}`;
       placed.add(key);
+
+      const isHovering = checkHovering({
+        colJ,
+        rowI,
+        rowHover,
+        columnHover,
+        mouseOverIndex,
+      });
+
       stickyItems.push(
         <div
+          onMouseEnter={() => handleItemMouseEnter({ column: colJ, row: rowI })}
           key={key}
           style={{
             width: columnWidth,
@@ -123,6 +166,7 @@ export function VirtualGrid(props: VirtualGridProps) {
           }}
         >
           {itemRenderer({
+            isHovering,
             isSticky: true,
             rowIndex: rowI,
             columnIndex: colJ,
@@ -139,8 +183,16 @@ export function VirtualGrid(props: VirtualGridProps) {
       const key = `${rowI}:${colJ}`;
       if (placed.has(key)) continue;
 
+      const isHovering = checkHovering({
+        colJ,
+        rowI,
+        rowHover,
+        columnHover,
+        mouseOverIndex,
+      });
       stickyColumns.push(
         <div
+          onMouseEnter={() => handleItemMouseEnter({ column: colJ, row: rowI })}
           key={key}
           style={{
             width: columnWidth,
@@ -151,6 +203,7 @@ export function VirtualGrid(props: VirtualGridProps) {
           }}
         >
           {itemRenderer({
+            isHovering,
             isSticky: true,
             rowIndex: rowI,
             columnIndex: colJ,
@@ -159,7 +212,6 @@ export function VirtualGrid(props: VirtualGridProps) {
       );
     }
   }
-
 
   const stickyRowLeft = stickyColumnCount * columnWidth;
   const stickyRows: ReactNode[] = [];
@@ -168,18 +220,27 @@ export function VirtualGrid(props: VirtualGridProps) {
       const key = `${rowI}:${colJ}`;
       if (placed.has(key)) continue;
 
+      const isHovering = checkHovering({
+        colJ,
+        rowI,
+        rowHover,
+        columnHover,
+        mouseOverIndex,
+      });
       stickyRows.push(
         <div
+          onMouseEnter={() => handleItemMouseEnter({ column: colJ, row: rowI })}
           key={key}
           style={{
             width: columnWidth,
             height: rowHeight,
             position: "absolute",
             top: rowI * rowHeight,
-            left: colJ * columnWidth - stickyRowLeft
+            left: colJ * columnWidth - stickyRowLeft,
           }}
         >
           {itemRenderer({
+            isHovering,
             isSticky: true,
             rowIndex: rowI,
             columnIndex: colJ,
@@ -188,51 +249,80 @@ export function VirtualGrid(props: VirtualGridProps) {
       );
     }
   }
+
   return (
     <div
       style={{ ...outerDimension, overflow: "auto" }}
       ref={outerRef}
       onScroll={onInnerScroll}
+      onMouseLeave={onMouseLeaveOuterEl}
     >
       <div style={{ position: "relative", ...innerDimension }}>
-        <div
-          style={{
-            position: "sticky",
-            top: 0,
-            left: stickyRowLeft,
-            height: 0,
-            width: `calc(100% - ${stickyRowLeft}px)`,
-            zIndex: 2,
-          }}
-        >
-          {stickyRows}
-        </div>
-        <div
-          style={{
-            position: "sticky",
-            top: 0,
-            left: 0,
-            width: 0,
-            height: 0,
-            zIndex: 3,
-          }}
-        >
-          {stickyItems}
-        </div>
-        <div
-          style={{
-            position: "sticky",
-            top: stickyColumnTop,
-            left: 0,
-            height: `calc(100% - ${stickyColumnTop}px)`,
-            width: 0,
-            zIndex: 2,
-          }}
-        >
-          {stickyColumns}
-        </div>
+        {/* sticky rows container has to come first */}
+        {stickyRows.length && (
+          <div
+            style={{
+              position: "sticky",
+              top: 0,
+              left: stickyRowLeft,
+              height: 0,
+              width: `calc(100% - ${stickyRowLeft}px)`,
+              zIndex: 2,
+            }}
+          >
+            {stickyRows}
+          </div>
+        )}
+        {stickyItems.length && (
+          <div
+            style={{
+              position: "sticky",
+              top: 0,
+              left: 0,
+              width: 0,
+              height: 0,
+              zIndex: 3,
+            }}
+          >
+            {stickyItems}
+          </div>
+        )}
+        {stickyColumns.length && (
+          <div
+            style={{
+              position: "sticky",
+              top: stickyColumnTop,
+              left: 0,
+              height: `calc(100% - ${stickyColumnTop}px)`,
+              width: 0,
+              zIndex: 2,
+            }}
+          >
+            {stickyColumns}
+          </div>
+        )}
         {items}
       </div>
     </div>
+  );
+}
+
+function checkHovering({
+  rowI,
+  colJ,
+  rowHover,
+  columnHover,
+  mouseOverIndex,
+}: {
+  rowI: number;
+  colJ: number;
+  rowHover: boolean;
+  columnHover: boolean;
+  mouseOverIndex: null | { row: number; column: number };
+}) {
+  return !!(
+    mouseOverIndex &&
+    ((rowHover && rowI === mouseOverIndex.row) ||
+      (columnHover && colJ === mouseOverIndex.column))
   );
 }
