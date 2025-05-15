@@ -1,0 +1,1 @@
+export type NumberOrNumberFn = number | ((index: number) => number)

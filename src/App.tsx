@@ -23,24 +23,37 @@ export function App() {
         <VirtualList
           itemCount={itemData.length}
           overflowCount={3}
-          itemHeight={30}
+          itemHeight={(index) => {
+            if (index % 5 === 0) return 30;
+            if (index % 2 === 0) return 40;
+            return 50;
+          }}
           height={400}
           width={600}
           itemRenderer={({ index, isSticky }) => (
             <ListItem isSticky={isSticky}>{itemData[index]}</ListItem>
           )}
-          stickyRowCount={3}
+          stickyRowCount={1}
         />
       </div>
       <div>
         <VirtualGrid
           height={400}
           width={600}
-          columnWidth={100}
+          columnWidth={(index) => {
+            if (index % 5 === 0) return 120;
+            if (index % 2 === 0) return 100;
+            return 80;
+          }}
           columnCount={100}
           rowCount={100}
-          rowHeight={30}
-          overflowCount={3}
+          rowHeight={(index) => {
+            if (index % 5 === 0) return 50;
+            if (index % 2 === 0) return 40;
+            return 30;
+          }}
+          rowOverflow={3}
+          columnOverflow={3}
           stickyRowCount={2}
           stickyColumnCount={2}
           rowHover
