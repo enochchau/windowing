@@ -1,7 +1,7 @@
 import { VirtualGrid } from "./VirtualGrid";
 import css from "./App.module.css";
 import { VirtualList } from "./VirtualList";
-import { classNames } from "./classnames";
+import { classNames } from "./classNames";
 
 const itemData = Array.from({ length: 1000 }, (_, i) => `I ${i}`);
 
