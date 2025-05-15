@@ -2,11 +2,6 @@ import { useState, type ReactNode } from "react";
 import type { NumberOrNumberFn } from "./types";
 import { usePlacer } from "./usePlacer";
 
-export type ListItemData<T> = {
-  id: React.Key;
-  data: T;
-};
-
 export interface VirtualGridProps {
   height: number;
   width: number;
