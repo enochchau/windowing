@@ -23,7 +23,7 @@ export function VirtualGrid(props: VirtualGridProps) {
     innerRef,
     innerWidth,
     innerHeight,
-    onInnerScroll,
+    onOuterScroll: onOuterScroll,
     getColumnWidth,
     getRowHeight,
     getColumnPlacement,
@@ -221,7 +221,7 @@ export function VirtualGrid(props: VirtualGridProps) {
     <div
       ref={outerRef}
       style={{ height: outerHeight, width: outerWidth, overflow: "auto" }}
-      onScroll={onInnerScroll}
+      onScroll={onOuterScroll}
       onMouseLeave={onMouseLeaveOuterEl}
     >
       <div

@@ -27,7 +27,7 @@ export interface UseVirtualGridReturn {
     innerRef: React.RefObject<HTMLDivElement | null>;
     innerWidth: number;
     innerHeight: number;
-    onInnerScroll: React.UIEventHandler<HTMLDivElement>;
+    onOuterScroll: React.UIEventHandler<HTMLDivElement>;
 
     getColumnWidth: (i: number) => number;
     getRowHeight: (i: number) => number;
@@ -76,7 +76,7 @@ export function useVirtualGrid(args: UseVirtualGridArgs): UseVirtualGridReturn {
     row: { start: 0, end: rowPlacer.placementToIndex(outerHeight) },
   });
 
-  const onInnerScroll: React.UIEventHandler<HTMLDivElement> = useCallback(
+  const onOuterScroll: React.UIEventHandler<HTMLDivElement> = useCallback(
     (e) => {
       const outerEl = e.currentTarget;
       const top = outerEl.scrollTop;
@@ -150,7 +150,7 @@ export function useVirtualGrid(args: UseVirtualGridArgs): UseVirtualGridReturn {
       innerRef,
       innerWidth: columnWidthsSum,
       innerHeight: rowHeightsSum,
-      onInnerScroll,
+      onOuterScroll: onOuterScroll,
 
       getColumnWidth,
       getColumnPlacement: columnPlacer.indexToPlacement,
