@@ -20,7 +20,7 @@ export function VirtualList(props: VirtualListProps) {
 
   const {
     placer,
-    dimensions: itemHeights,
+    getDimension: getItemHeight,
     sum: innerDivHeight,
   } = usePlacer(props.itemHeight, itemCount);
 
@@ -56,7 +56,7 @@ export function VirtualList(props: VirtualListProps) {
       <div
         key={i}
         style={{
-          height: itemHeights[i],
+          height: getItemHeight(i),
           width: "100%",
           position: "absolute",
           left: 0,
@@ -75,7 +75,7 @@ export function VirtualList(props: VirtualListProps) {
         <div
           key={i}
           style={{
-            height: itemHeights[i],
+            height: getItemHeight(i),
             width: "100%",
             position: "sticky",
             left: 0,
