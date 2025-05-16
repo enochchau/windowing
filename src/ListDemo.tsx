@@ -42,6 +42,7 @@ export function ListDemo() {
       </button>
       <VirtualList
         {...listProps}
+        overflowCount={3}
         width={400}
         itemRenderer={({ index, isSticky }) => (
           <ListItem
