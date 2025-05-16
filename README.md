@@ -6,12 +6,12 @@ https://enochchau.github.io/windowing/
 
 ## Features
 
-- sticky rows
-- sticky columns
+- sticky leading rows
+- sticky leading columns
 - variable sized items/cells
 - grid row & column hover
+- scroll to item/cell
 
 ## Roadmap
 
 - [ ] sticky grid sections
-- [ ] scroll to
