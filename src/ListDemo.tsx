@@ -1,7 +1,7 @@
 import { ListItem } from "./ListItem";
 import css from "./ListDemo.module.css";
-import { useVirtualList } from "./useVirtualList";
-import { VirtualList } from "./VirtualList";
+import { useVirtualList } from "./lib/useVirtualList";
+import { VirtualList } from "./lib/VirtualList";
 
 const itemData = Array.from({ length: 200 }, (_, i) => `I ${i}`);
 

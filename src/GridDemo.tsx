@@ -1,6 +1,6 @@
 import { ListItem } from "./ListItem";
-import { VirtualGrid } from "./VirtualGrid";
-import { useVirtualGrid } from "./useVirtualGrid";
+import { VirtualGrid } from "./lib/VirtualGrid";
+import { useVirtualGrid } from "./lib/useVirtualGrid";
 import css from "./GridDemo.module.css";
 
 const rows = 100;
