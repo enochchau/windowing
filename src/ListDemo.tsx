@@ -2,10 +2,12 @@ import { ListItem } from "./ListItem";
 import css from "./ListDemo.module.css";
 import { useVirtualList } from "./lib/useVirtualList";
 import { VirtualList } from "./lib/VirtualList";
+import { useState } from "react";
 
 const itemData = Array.from({ length: 200 }, (_, i) => `I ${i}`);
 
 export function ListDemo() {
+  const [enableSticky, setEnableSticky] = useState(true);
   const { listProps, scrollToItem } = useVirtualList({
     itemCount: itemData.length,
     itemHeight: (index) => {
@@ -14,13 +16,21 @@ export function ListDemo() {
       return 50;
     },
     height: 400,
-    stickyItemCount: 1,
+    stickyItemCount: enableSticky ? 3 : undefined,
   });
 
   const scrollIndex = 58;
 
   return (
     <div className={css["container"]}>
+      <label>
+        Enable Sticky
+        <input
+          type="checkbox"
+          checked={enableSticky}
+          onChange={(e) => setEnableSticky(e.currentTarget.checked)}
+        />
+      </label>
       <button onClick={() => scrollToItem(scrollIndex)}>
         Scroll to {scrollIndex} - Start
       </button>
@@ -33,7 +43,6 @@ export function ListDemo() {
       <VirtualList
         {...listProps}
         width={400}
-        overflowCount={3}
         itemRenderer={({ index, isSticky }) => (
           <ListItem
             isSticky={isSticky}

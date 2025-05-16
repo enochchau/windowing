@@ -2,6 +2,7 @@ import { ListItem } from "./ListItem";
 import { VirtualGrid } from "./lib/VirtualGrid";
 import { useVirtualGrid } from "./lib/useVirtualGrid";
 import css from "./GridDemo.module.css";
+import { useState } from "react";
 
 const rows = 100;
 const cols = 100;
@@ -15,9 +16,10 @@ for (let i = 0; i < rows; i++) {
 }
 
 export function GridDemo() {
+  const [enableSticky, setEnableSticky] = useState(true);
   const { gridProps, scrollToCell } = useVirtualGrid({
-    stickyColumnCount: 2,
-    stickyRowCount: 2,
+    stickyColumnCount: enableSticky ? 2 : undefined,
+    stickyRowCount: enableSticky ? 2 : undefined,
     height: 400,
     width: 600,
     columnCount: cellData[0].length,
@@ -40,6 +42,14 @@ export function GridDemo() {
   return (
     <div className={css["container"]}>
       <div>
+        <label>
+          Enable Sticky
+          <input
+            type="checkbox"
+            checked={enableSticky}
+            onChange={(e) => setEnableSticky(e.currentTarget.checked)}
+          />
+        </label>
         <button
           onClick={() =>
             scrollToCell({

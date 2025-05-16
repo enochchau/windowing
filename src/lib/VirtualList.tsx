@@ -2,7 +2,7 @@ import { type ReactNode } from "react";
 import type { UseVirtualListReturn } from "./useVirtualList";
 
 export type VirtualListProps = UseVirtualListReturn["listProps"] & {
-  overflowCount: number;
+  overflowCount?: number;
   itemRenderer: (args: { index: number; isSticky: boolean }) => ReactNode;
   width: number;
 };
@@ -16,7 +16,7 @@ export function VirtualList(props: VirtualListProps) {
     visibleIndex,
     itemCount,
     stickyItemCount,
-    overflowCount,
+    overflowCount = 0,
     itemRenderer,
 
     getItemHeight,
@@ -39,6 +39,7 @@ export function VirtualList(props: VirtualListProps) {
       }
     }
 
+    const top = getItemPlacement(i);
     items.push(
       <div
         key={i}
@@ -46,8 +47,7 @@ export function VirtualList(props: VirtualListProps) {
           height: getItemHeight(i),
           width: "100%",
           position: "absolute",
-          left: 0,
-          top: getItemPlacement(i),
+          transform: `translateY(${top}px)`,
         }}
       >
         {itemRenderer({ isSticky: false, index: i })}
@@ -58,16 +58,15 @@ export function VirtualList(props: VirtualListProps) {
   const stickyItems: ReactNode[] = [];
   if (typeof stickyItemCount === "number") {
     for (let i = 0; i < stickyItemCount; i++) {
+      const top = getItemPlacement(i);
       stickyItems.push(
         <div
           key={i}
           style={{
             height: getItemHeight(i),
             width: "100%",
-            position: "sticky",
-            left: 0,
-            top: getItemPlacement(i),
-            zIndex: 2,
+            transform: `translateY(${top}px)`,
+            position: 'absolute'
           }}
         >
           {itemRenderer({ isSticky: true, index: i })}
@@ -83,7 +82,17 @@ export function VirtualList(props: VirtualListProps) {
       onScroll={onOuterScroll}
     >
       <div style={{ position: "relative", height: innerHeight }} ref={innerRef}>
-        {stickyItems}
+        <div
+          style={{
+            position: "sticky",
+            top: 0,
+            left: 0,
+            height: 0,
+            zIndex: 2,
+          }}
+        >
+          {stickyItems}
+        </div>
         {items}
       </div>
     </div>

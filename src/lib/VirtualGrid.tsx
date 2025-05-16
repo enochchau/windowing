@@ -2,8 +2,8 @@ import { useState, type ReactNode } from "react";
 import type { UseVirtualGridReturn } from "./useVirtualGrid";
 
 export type VirtualGridProps = UseVirtualGridReturn["gridProps"] & {
-  rowOverflow: number;
-  columnOverflow: number;
+  rowOverflow?: number;
+  columnOverflow?: number;
 
   itemRenderer: (args: {
     isHovering: boolean;
@@ -34,10 +34,10 @@ export function VirtualGrid(props: VirtualGridProps) {
     stickyRowCount,
     rowHover = false,
     columnHover = false,
-    rowOverflow,
+    rowOverflow = 0,
     rowCount,
     columnCount,
-    columnOverflow,
+    columnOverflow = 0,
   } = props;
   const [mouseOverIndex, setMouseOverIndex] = useState<{
     row: number;
@@ -51,6 +51,8 @@ export function VirtualGrid(props: VirtualGridProps) {
     columnCount - 1,
     visibleIndex.column.end + columnOverflow
   );
+  const stickyRowLeft = getColumnPlacement(stickyColumnCount);
+  const stickyColumnTop = getRowPlacement(stickyRowCount);
 
   const items: ReactNode[] = [];
   for (let rowI = rowStart; rowI <= rowEnd; rowI++) {
@@ -70,6 +72,8 @@ export function VirtualGrid(props: VirtualGridProps) {
         mouseOverIndex,
       });
 
+      const top = getRowPlacement(rowI) 
+      const left = getColumnPlacement(colJ) 
       items.push(
         <div
           key={`${rowI}:${colJ}`}
@@ -78,8 +82,7 @@ export function VirtualGrid(props: VirtualGridProps) {
             width: getColumnWidth(colJ),
             height: getRowHeight(rowI),
             position: "absolute",
-            top: getRowPlacement(rowI),
-            left: getColumnPlacement(colJ),
+            transform: `translate(${left}px, ${top}px)`,
           }}
         >
           {itemRenderer({
@@ -117,6 +120,8 @@ export function VirtualGrid(props: VirtualGridProps) {
         mouseOverIndex,
       });
 
+      const top = getRowPlacement(rowI);
+      const left = getColumnPlacement(colJ);
       stickyItems.push(
         <div
           onMouseEnter={() => handleItemMouseEnter({ column: colJ, row: rowI })}
@@ -124,10 +129,9 @@ export function VirtualGrid(props: VirtualGridProps) {
           style={{
             width: getColumnWidth(colJ),
             height: getRowHeight(rowI),
-            top: getRowPlacement(rowI),
-            left: getColumnPlacement(colJ),
             position: "absolute",
             overflow: "hidden",
+            transform: `translate(${left}px, ${top}px)`,
           }}
         >
           {itemRenderer({
@@ -141,7 +145,6 @@ export function VirtualGrid(props: VirtualGridProps) {
     }
   }
 
-  const stickyColumnTop = getRowPlacement(stickyRowCount);
   const stickyColumns: ReactNode[] = [];
   for (let rowI = rowStart; rowI <= rowEnd; rowI++) {
     for (let colJ = 0; colJ < stickyColumnCount; colJ++) {
@@ -155,6 +158,8 @@ export function VirtualGrid(props: VirtualGridProps) {
         columnHover,
         mouseOverIndex,
       });
+      const top = getRowPlacement(rowI) - stickyColumnTop;
+      const left = getColumnPlacement(colJ);
       stickyColumns.push(
         <div
           onMouseEnter={() => handleItemMouseEnter({ column: colJ, row: rowI })}
@@ -162,10 +167,9 @@ export function VirtualGrid(props: VirtualGridProps) {
           style={{
             width: getColumnWidth(colJ),
             height: getRowHeight(rowI),
-            top: getRowPlacement(rowI) - stickyColumnCount,
-            left: getColumnPlacement(colJ),
             position: "absolute",
             overflow: "hidden",
+            transform: `translate(${left}px, ${top}px)`,
           }}
         >
           {itemRenderer({
@@ -179,7 +183,6 @@ export function VirtualGrid(props: VirtualGridProps) {
     }
   }
 
-  const stickyRowLeft = getColumnPlacement(stickyColumnCount);
   const stickyRows: ReactNode[] = [];
   for (let rowI = 0; rowI < stickyRowCount; rowI++) {
     for (let colJ = colStart; colJ <= colEnd; colJ++) {
@@ -193,6 +196,9 @@ export function VirtualGrid(props: VirtualGridProps) {
         columnHover,
         mouseOverIndex,
       });
+
+      const top = getRowPlacement(rowI);
+      const left = getColumnPlacement(colJ) - stickyRowLeft;
       stickyRows.push(
         <div
           onMouseEnter={() => handleItemMouseEnter({ column: colJ, row: rowI })}
@@ -200,10 +206,9 @@ export function VirtualGrid(props: VirtualGridProps) {
           style={{
             width: getColumnWidth(colJ),
             height: getRowHeight(rowI),
-            top: getRowPlacement(rowI),
-            left: getColumnPlacement(colJ) - stickyRowLeft,
             position: "absolute",
             overflow: "hidden",
+            transform: `translate(${left}px, ${top}px)`,
           }}
         >
           {itemRenderer({
@@ -228,8 +233,9 @@ export function VirtualGrid(props: VirtualGridProps) {
         style={{ position: "relative", height: innerHeight, width: innerWidth }}
         ref={innerRef}
       >
+        {items}
         {/* sticky rows container has to come first */}
-        {stickyRows.length && (
+        {stickyRows.length > 0 && (
           <div
             style={{
               position: "sticky",
@@ -243,7 +249,7 @@ export function VirtualGrid(props: VirtualGridProps) {
             {stickyRows}
           </div>
         )}
-        {stickyItems.length && (
+        {stickyItems.length > 0 && (
           <div
             style={{
               position: "sticky",
@@ -257,13 +263,13 @@ export function VirtualGrid(props: VirtualGridProps) {
             {stickyItems}
           </div>
         )}
-        {stickyColumns.length && (
+        {stickyColumns.length > 0 && (
           <div
             style={{
               position: "sticky",
               top: stickyColumnTop,
               left: 0,
-              height: "100%",
+              height: `calc(100% - ${stickyColumnTop}px)`,
               width: 0,
               zIndex: 2,
             }}
@@ -271,7 +277,6 @@ export function VirtualGrid(props: VirtualGridProps) {
             {stickyColumns}
           </div>
         )}
-        {items}
       </div>
     </div>
   );
