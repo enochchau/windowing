@@ -1,20 +1,9 @@
 import { useState, type ReactNode } from "react";
-import type { NumberOrNumberFn } from "./types";
-import { usePlacer } from "./usePlacer";
+import type { UseVirtualGridReturn } from "./useVirtualGrid";
 
-export interface VirtualGridProps {
-  height: number;
-  width: number;
-
-  columnWidth: NumberOrNumberFn;
-  columnCount: number;
-  /** additional columns to render outside the window */
-  columnOverflow: number;
-
-  rowCount: number;
-  rowHeight: NumberOrNumberFn;
-  /** additional rows to render outside the window */
+export type VirtualGridProps = UseVirtualGridReturn["gridProps"] & {
   rowOverflow: number;
+  columnOverflow: number;
 
   itemRenderer: (args: {
     isHovering: boolean;
@@ -23,82 +12,44 @@ export interface VirtualGridProps {
     columnIndex: number;
   }) => React.ReactNode;
 
-  stickyRowCount?: number;
-  stickyColumnCount?: number;
-
   rowHover?: boolean;
   columnHover?: boolean;
-}
+};
 export function VirtualGrid(props: VirtualGridProps) {
-  const outerDimension = {
-    height: props.height,
-    width: props.width,
-  };
   const {
-    rowCount,
-    rowOverflow,
-    columnCount,
-    columnOverflow,
+    outerRef,
+    outerWidth,
+    outerHeight,
+    innerRef,
+    innerWidth,
+    innerHeight,
+    onInnerScroll,
+    getColumnWidth,
+    getRowHeight,
+    getColumnPlacement,
+    getRowPlacement,
+    visibleIndex,
     itemRenderer,
-    stickyColumnCount = 0,
-    stickyRowCount = 0,
+    stickyColumnCount,
+    stickyRowCount,
     rowHover = false,
     columnHover = false,
+    rowOverflow,
+    rowCount,
+    columnCount,
+    columnOverflow,
   } = props;
-
-  const {
-    dimensions: columnWidths,
-    placer: columnPlacer,
-    sum: columnWidthsSum,
-  } = usePlacer(props.columnWidth, columnCount);
-
-  const {
-    placer: rowPlacer,
-    sum: rowHeightsSum,
-    dimensions: rowHeights,
-  } = usePlacer(props.rowHeight, rowCount);
-
-  const [visibleIndex, setVisibleIndex] = useState({
-    col: {
-      start: 0,
-      end: columnPlacer.placementToIndex(outerDimension.width),
-    },
-    row: { start: 0, end: rowPlacer.placementToIndex(outerDimension.height) },
-  });
   const [mouseOverIndex, setMouseOverIndex] = useState<{
     row: number;
     column: number;
   } | null>(null);
 
-  const innerDimension = {
-    width: columnWidthsSum,
-    height: rowHeightsSum,
-  };
-
-  const onInnerScroll: React.UIEventHandler<HTMLDivElement> = (e) => {
-    const outerEl = e.currentTarget;
-    const top = outerEl.scrollTop;
-    const bottom = top + outerEl.clientHeight;
-    const left = outerEl.scrollLeft;
-    const right = left + outerEl.clientWidth;
-
-    const row = {
-      start: rowPlacer.placementToIndex(top),
-      end: rowPlacer.placementToIndex(bottom),
-    };
-    const col = {
-      start: columnPlacer.placementToIndex(left),
-      end: columnPlacer.placementToIndex(right),
-    };
-    setVisibleIndex({ row: row, col: col });
-  };
-
   const rowStart = Math.max(0, visibleIndex.row.start - rowOverflow);
   const rowEnd = Math.min(rowCount - 1, visibleIndex.row.end + rowOverflow);
-  const colStart = Math.max(0, visibleIndex.col.start - columnOverflow);
+  const colStart = Math.max(0, visibleIndex.column.start - columnOverflow);
   const colEnd = Math.min(
     columnCount - 1,
-    visibleIndex.col.end + columnOverflow
+    visibleIndex.column.end + columnOverflow
   );
 
   const items: ReactNode[] = [];
@@ -124,11 +75,11 @@ export function VirtualGrid(props: VirtualGridProps) {
           key={`${rowI}:${colJ}`}
           onMouseEnter={() => handleItemMouseEnter({ column: colJ, row: rowI })}
           style={{
-            width: columnWidths[colJ],
-            height: rowHeights[rowI],
+            width: getColumnWidth(colJ),
+            height: getRowHeight(rowI),
             position: "absolute",
-            top: rowPlacer.indexToPlacement(rowI),
-            left: columnPlacer.indexToPlacement(colJ),
+            top: getRowPlacement(rowI),
+            left: getColumnPlacement(colJ),
           }}
         >
           {itemRenderer({
@@ -171,11 +122,12 @@ export function VirtualGrid(props: VirtualGridProps) {
           onMouseEnter={() => handleItemMouseEnter({ column: colJ, row: rowI })}
           key={key}
           style={{
-            width: columnWidths[colJ],
-            height: rowHeights[rowI],
+            width: getColumnWidth(colJ),
+            height: getRowHeight(rowI),
+            top: getRowPlacement(rowI),
+            left: getColumnPlacement(colJ),
             position: "absolute",
-            top: rowPlacer.indexToPlacement(rowI),
-            left: columnPlacer.indexToPlacement(colJ),
+            overflow: "hidden",
           }}
         >
           {itemRenderer({
@@ -189,7 +141,7 @@ export function VirtualGrid(props: VirtualGridProps) {
     }
   }
 
-  const stickyColumnTop = rowPlacer.indexToPlacement(stickyRowCount);
+  const stickyColumnTop = getRowPlacement(stickyRowCount);
   const stickyColumns: ReactNode[] = [];
   for (let rowI = rowStart; rowI <= rowEnd; rowI++) {
     for (let colJ = 0; colJ < stickyColumnCount; colJ++) {
@@ -208,11 +160,12 @@ export function VirtualGrid(props: VirtualGridProps) {
           onMouseEnter={() => handleItemMouseEnter({ column: colJ, row: rowI })}
           key={key}
           style={{
-            width: columnWidths[colJ],
-            height: rowHeights[rowI],
+            width: getColumnWidth(colJ),
+            height: getRowHeight(rowI),
+            top: getRowPlacement(rowI) - stickyColumnCount,
+            left: getColumnPlacement(colJ),
             position: "absolute",
-            top: rowPlacer.indexToPlacement(rowI) - stickyColumnTop,
-            left: columnPlacer.indexToPlacement(colJ),
+            overflow: "hidden",
           }}
         >
           {itemRenderer({
@@ -226,7 +179,7 @@ export function VirtualGrid(props: VirtualGridProps) {
     }
   }
 
-  const stickyRowLeft = columnPlacer.indexToPlacement(stickyColumnCount);
+  const stickyRowLeft = getColumnPlacement(stickyColumnCount);
   const stickyRows: ReactNode[] = [];
   for (let rowI = 0; rowI < stickyRowCount; rowI++) {
     for (let colJ = colStart; colJ <= colEnd; colJ++) {
@@ -245,11 +198,12 @@ export function VirtualGrid(props: VirtualGridProps) {
           onMouseEnter={() => handleItemMouseEnter({ column: colJ, row: rowI })}
           key={key}
           style={{
-            width: columnWidths[colJ],
-            height: rowHeights[rowI],
+            width: getColumnWidth(colJ),
+            height: getRowHeight(rowI),
+            top: getRowPlacement(rowI),
+            left: getColumnPlacement(colJ) - stickyRowLeft,
             position: "absolute",
-            top: rowPlacer.indexToPlacement(rowI),
-            left: columnPlacer.indexToPlacement(colJ) - stickyRowLeft,
+            overflow: "hidden",
           }}
         >
           {itemRenderer({
@@ -265,11 +219,15 @@ export function VirtualGrid(props: VirtualGridProps) {
 
   return (
     <div
-      style={{ ...outerDimension, overflow: "auto" }}
+      ref={outerRef}
+      style={{ height: outerHeight, width: outerWidth, overflow: "auto" }}
       onScroll={onInnerScroll}
       onMouseLeave={onMouseLeaveOuterEl}
     >
-      <div style={{ position: "relative", ...innerDimension }}>
+      <div
+        style={{ position: "relative", height: innerHeight, width: innerWidth }}
+        ref={innerRef}
+      >
         {/* sticky rows container has to come first */}
         {stickyRows.length && (
           <div
@@ -305,7 +263,7 @@ export function VirtualGrid(props: VirtualGridProps) {
               position: "sticky",
               top: stickyColumnTop,
               left: 0,
-              height: `calc(100% - ${stickyColumnTop}px)`,
+              height: "100%",
               width: 0,
               zIndex: 2,
             }}

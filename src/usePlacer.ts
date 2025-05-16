@@ -13,7 +13,7 @@ export function usePlacer(itemDimension: NumberOrNumberFn, count: number) {
     return {
       placer: placer,
       sum: sum(dimensions),
-      dimensions,
+      getDimension: (index:number) => dimensions[index],
     };
   }, [itemDimension, count]);
 }
