@@ -1,8 +1,12 @@
-import type { NumberOrNumberFn, ScrollToCell, VisibleIndex } from "./types";
+import type {
+  NumberOrNumberFn,
+  Placer,
+  ScrollToCell,
+  VisibleGridIndex,
+} from "./types";
 import { usePlacer } from "./usePlacer";
 import { useCallback, useRef, useState } from "react";
 
-type Placer = ReturnType<typeof usePlacer>["placer"];
 export interface UseVirtualGridArgs {
   height: number;
   width: number;
@@ -30,7 +34,7 @@ export interface UseVirtualGridReturn {
     getColumnPlacement: Placer["indexToPlacement"];
     getRowPlacement: Placer["indexToPlacement"];
 
-    visibleIndex: VisibleIndex;
+    visibleIndex: VisibleGridIndex;
     rowCount: number;
     columnCount: number;
 
@@ -64,7 +68,7 @@ export function useVirtualGrid(args: UseVirtualGridArgs): UseVirtualGridReturn {
     getDimension: getRowHeight,
   } = usePlacer(args.rowHeight, rowCount);
 
-  const [visibleIndex, setVisibleIndex] = useState<VisibleIndex>({
+  const [visibleIndex, setVisibleIndex] = useState<VisibleGridIndex>({
     column: {
       start: 0,
       end: columnPlacer.placementToIndex(outerWidth),
@@ -95,36 +99,35 @@ export function useVirtualGrid(args: UseVirtualGridArgs): UseVirtualGridReturn {
 
   const scrollToCell: ScrollToCell = useCallback(
     (args, opts) => {
-      if (outerRef.current) {
-        let top = rowPlacer.indexToPlacement(args.rowIndex);
-        if (opts?.block === "center") {
-          top = top - outerHeight / 2;
-        } else if (opts?.block === "end") {
-          top = top - (outerHeight - getRowHeight(args.rowIndex));
-        } else {
-          let stickyRowOffset = 0;
-          if (stickyRowCount) {
-            stickyRowOffset = rowPlacer.indexToPlacement(stickyRowCount);
-          }
-          top = top - stickyRowOffset;
-        }
+      if (!outerRef.current) return;
 
-        let left = columnPlacer.indexToPlacement(args.columnIndex);
-        if (opts?.inline === "center") {
-          left = left - outerWidth / 2;
-        } else if (opts?.inline === "end") {
-          left = left - (outerWidth - getColumnWidth(args.columnIndex));
-        } else {
-          let stickyColumnOffset = 0;
-          if (stickyColumnCount) {
-            stickyColumnOffset =
-              columnPlacer.indexToPlacement(stickyColumnCount);
-          }
-          left = left - stickyColumnOffset;
+      let top = rowPlacer.indexToPlacement(args.rowIndex);
+      if (opts?.block === "center") {
+        top = top - outerHeight / 2;
+      } else if (opts?.block === "end") {
+        top = top - (outerHeight - getRowHeight(args.rowIndex));
+      } else {
+        let stickyRowOffset = 0;
+        if (stickyRowCount) {
+          stickyRowOffset = rowPlacer.indexToPlacement(stickyRowCount);
         }
-
-        outerRef.current.scrollTo({ top, left });
+        top = top - stickyRowOffset;
       }
+
+      let left = columnPlacer.indexToPlacement(args.columnIndex);
+      if (opts?.inline === "center") {
+        left = left - outerWidth / 2;
+      } else if (opts?.inline === "end") {
+        left = left - (outerWidth - getColumnWidth(args.columnIndex));
+      } else {
+        let stickyColumnOffset = 0;
+        if (stickyColumnCount) {
+          stickyColumnOffset = columnPlacer.indexToPlacement(stickyColumnCount);
+        }
+        left = left - stickyColumnOffset;
+      }
+
+      outerRef.current.scrollTo({ top, left });
     },
     [
       rowPlacer,

@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import type { NumberOrNumberFn } from "./types";
+import type { NumberOrNumberFn, Placer } from "./types";
 
 export function usePlacer(itemDimension: NumberOrNumberFn, count: number) {
   return useMemo(() => {
@@ -32,7 +32,7 @@ function numberOrFnToFn(nfn: NumberOrNumberFn): (index: number) => number {
  * @param itemDimensions
  * @returns
  */
-function createPlacer(itemDimensions: number[]) {
+function createPlacer(itemDimensions: number[]): Placer {
   const indexToPlacementCache: Record<string, number> = {};
   const placementToIndexCache: Record<string, number> = {};
 

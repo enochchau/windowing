@@ -1,43 +1,30 @@
-import { useState, type ReactNode } from "react";
-import type { NumberOrNumberFn } from "./types";
-import { usePlacer } from "./usePlacer";
+import { type ReactNode } from "react";
+import type { UseVirtualListReturn } from "./useVirtualList";
 
-export interface VirtualListProps {
+export type VirtualListProps = UseVirtualListReturn["listProps"] & {
   overflowCount: number;
-  width: number;
-  itemCount: number;
-  height: number;
-  itemHeight: NumberOrNumberFn;
   itemRenderer: (args: { index: number; isSticky: boolean }) => ReactNode;
-  stickyRowCount?: number;
-}
+  width: number;
+};
 export function VirtualList(props: VirtualListProps) {
-  const outerDimension = {
-    height: props.height,
-    width: props.width,
-  };
-  const { itemCount, stickyRowCount, overflowCount, itemRenderer } = props;
-
   const {
-    placer,
-    getDimension: getItemHeight,
-    sum: innerDivHeight,
-  } = usePlacer(props.itemHeight, itemCount);
+    innerRef,
+    innerHeight,
+    outerRef,
+    outerHeight,
 
-  const [visibleIndex, setVisibleIndex] = useState({
-    start: 0,
-    end: placer.placementToIndex(outerDimension.height) + overflowCount,
-  });
+    visibleIndex,
+    itemCount,
+    stickyItemCount,
+    overflowCount,
+    itemRenderer,
 
-  const onInnerScroll: React.UIEventHandler<HTMLDivElement> = (e) => {
-    const outerEl = e.currentTarget;
-    const top = outerEl.scrollTop;
-    const bottom = top + e.currentTarget.clientHeight;
+    getItemHeight,
+    getItemPlacement,
+    onOuterScroll,
 
-    const start = placer.placementToIndex(top);
-    const end = placer.placementToIndex(bottom);
-    setVisibleIndex({ start, end });
-  };
+    width,
+  } = props;
 
   const items: ReactNode[] = [];
 
@@ -46,8 +33,8 @@ export function VirtualList(props: VirtualListProps) {
     i <= Math.min(itemCount - 1, visibleIndex.end + overflowCount);
     i++
   ) {
-    if (typeof stickyRowCount === "number") {
-      if (i >= 0 && i < stickyRowCount) {
+    if (typeof stickyItemCount === "number") {
+      if (i >= 0 && i < stickyItemCount) {
         continue;
       }
     }
@@ -60,7 +47,7 @@ export function VirtualList(props: VirtualListProps) {
           width: "100%",
           position: "absolute",
           left: 0,
-          top: placer.indexToPlacement(i),
+          top: getItemPlacement(i),
         }}
       >
         {itemRenderer({ isSticky: false, index: i })}
@@ -69,8 +56,8 @@ export function VirtualList(props: VirtualListProps) {
   }
 
   const stickyItems: ReactNode[] = [];
-  if (typeof stickyRowCount === "number") {
-    for (let i = 0; i < stickyRowCount; i++) {
+  if (typeof stickyItemCount === "number") {
+    for (let i = 0; i < stickyItemCount; i++) {
       stickyItems.push(
         <div
           key={i}
@@ -79,7 +66,7 @@ export function VirtualList(props: VirtualListProps) {
             width: "100%",
             position: "sticky",
             left: 0,
-            top: placer.placementToIndex(i),
+            top: getItemPlacement(i),
             zIndex: 2,
           }}
         >
@@ -91,10 +78,11 @@ export function VirtualList(props: VirtualListProps) {
 
   return (
     <div
-      style={{ ...outerDimension, overflow: "auto" }}
-      onScroll={onInnerScroll}
+      ref={outerRef}
+      style={{ height: outerHeight, overflow: "auto", width }}
+      onScroll={onOuterScroll}
     >
-      <div style={{ position: "relative", height: innerDivHeight }}>
+      <div style={{ position: "relative", height: innerHeight }} ref={innerRef}>
         {stickyItems}
         {items}
       </div>

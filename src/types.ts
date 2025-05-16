@@ -1,13 +1,36 @@
+export type ScrollPlacement = "start" | "center" | "end";
+
 export type NumberOrNumberFn = number | ((index: number) => number);
+
 export type VisibleIndex = {
-  column: { start: number; end: number };
-  row: { start: number; end: number };
+  start: number;
+  end: number;
 };
 
-export type ScrollToCell = (args: {
-  rowIndex: number;
-  columnIndex: number;
-}, opts?: {
-  block?: 'start' | 'center' | 'end',
-  inline?: 'start' | 'center' | 'end'
-}) => void;
+export type VisibleGridIndex = {
+  column: VisibleIndex;
+  row: VisibleIndex;
+};
+
+export type ScrollToCell = (
+  args: {
+    rowIndex: number;
+    columnIndex: number;
+  },
+  opts?: {
+    block?: ScrollPlacement;
+    inline?: ScrollPlacement;
+  }
+) => void;
+
+export type ScrollToItem = (
+  index: number,
+  opts?: {
+    block: ScrollPlacement;
+  }
+) => void;
+
+export type Placer = {
+  indexToPlacement: (index: number) => number;
+  placementToIndex: (placement: number) => number;
+};
