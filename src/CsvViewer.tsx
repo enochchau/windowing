@@ -3,7 +3,7 @@ import css from "./CsvViewer.module.css";
 import { VirtualGrid } from "./lib/VirtualGrid";
 import { useWindowSize } from "./useWindowSize";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { demoRawCsv } from "./demoRawCsv";
 
 type SearchResult = {
@@ -16,56 +16,48 @@ const scrollOpts = { block: "center", inline: "center" } as const;
 export function CsvViewer() {
   const { height, width } = useWindowSize();
   const [search, setSearch] = useState("");
-  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
-  const [searchResultIndex, setSearchResultIndex] = useState(0);
-
+  const [searchResultIndex, setSearchResultIndex] = useState<number>(0);
   const [textAreaValue, setTextAreaValue] = useState(demoRawCsv);
-  const [csv, setCsv] = useState<string[][]>(parseToCsv(textAreaValue));
+  const [fixedColumns, setFixedColumns] = useState("0");
+  const [fixedRows, setFixedRows] = useState("1");
+
+  const csv = useMemo(() => parseToCsv(textAreaValue), [textAreaValue]);
+
+  const columnWidths = useMemo(() => csvToColumnWidths(csv), [csv]);
+
+  const { results: searchResults, resultSet: searchResultsSet } =
+    useMemo(() => {
+      if (!search) {
+        return { results: [], resultSet: new Set() };
+      }
+      const results = findSearchResults(search, csv);
+      const resultSet = new Set(
+        results.map(({ columnIndex, rowIndex }) => `${rowIndex};${columnIndex}`)
+      );
+      return { results, resultSet };
+    }, [search, csv]);
+
   const { gridProps, scrollToCell } = useVirtualGrid({
     height: height - 132,
     width: width - 48,
     rowCount: csv.length,
-    columnCount: csv[0].length,
+    columnCount: csv[0]?.length ?? 0,
     rowHeight: 40,
-    columnWidth: 60,
-    stickyRowCount: 1,
+    columnWidth: (ci) => columnWidths[ci] * 10,
+    stickyRowCount: parseInt(fixedRows),
+    stickyColumnCount: parseInt(fixedColumns),
   });
 
   const handleTextAreaChange: React.ChangeEventHandler<HTMLTextAreaElement> = (
     e
   ) => {
     setTextAreaValue(e.currentTarget.value);
-    setCsv(parseToCsv(e.currentTarget.value));
   };
 
   const handleSearch: React.ChangeEventHandler<HTMLInputElement> = (e) => {
     const search = e.currentTarget.value;
     setSearch(search);
-
-    const results: SearchResult[] = [];
-    if (!search) {
-      setSearchResults(results);
-      setSearchResultIndex(0);
-      return;
-    }
-
-    for (let rowIndex = 0; rowIndex < csv.length; rowIndex++) {
-      for (
-        let columnIndex = 0;
-        columnIndex < csv[rowIndex].length;
-        columnIndex++
-      ) {
-        if (csv[rowIndex][columnIndex].includes(search)) {
-          results.push({
-            rowIndex: rowIndex,
-            columnIndex: columnIndex,
-          });
-        }
-      }
-    }
-    setSearchResults(results);
     setSearchResultIndex(0);
-    scrollToCell({ ...results[0] }, scrollOpts);
   };
 
   const handleNext = () => {
@@ -74,12 +66,8 @@ export function CsvViewer() {
       nextIndex = 0;
     }
     setSearchResultIndex(nextIndex);
-    scrollToCell(
-      {
-        ...searchResults[nextIndex],
-      },
-      scrollOpts
-    );
+    const args = searchResults[nextIndex];
+    if (args) scrollToCell(args, scrollOpts);
   };
   const handlePrev = () => {
     let nextIndex = searchResultIndex - 1;
@@ -87,19 +75,9 @@ export function CsvViewer() {
       nextIndex = searchResults.length - 1;
     }
     setSearchResultIndex(nextIndex);
-    scrollToCell(
-      {
-        ...searchResults[nextIndex],
-      },
-      scrollOpts
-    );
+    const args = searchResults[nextIndex];
+    if (args) scrollToCell(args, scrollOpts);
   };
-
-  const searchResultSet = new Set(
-    searchResults.map(
-      ({ columnIndex, rowIndex }) => `${rowIndex};${columnIndex}`
-    )
-  );
 
   return (
     <div className={css["container"]}>
@@ -118,6 +96,24 @@ export function CsvViewer() {
         </label>
         <button onClick={handlePrev}>prev</button>
         <button onClick={handleNext}>next</button>
+        <label>
+          fixed rows
+          <input
+            min={0}
+            type="number"
+            value={fixedRows}
+            onChange={(e) => setFixedRows(e.currentTarget.value)}
+          />
+        </label>
+        <label>
+          fixed columns
+          <input
+            min={0}
+            type="number"
+            value={fixedColumns}
+            onChange={(e) => setFixedColumns(e.currentTarget.value)}
+          ></input>
+        </label>
       </div>
       <div className={css["grid-container"]}>
         <VirtualGrid
@@ -134,7 +130,7 @@ export function CsvViewer() {
                 rowIndex === searchResults[searchResultIndex]?.rowIndex &&
                 columnIndex === searchResults[searchResultIndex]?.columnIndex
               }
-              found={searchResultSet.has(`${rowIndex};${columnIndex}`)}
+              found={searchResultsSet.has(`${rowIndex};${columnIndex}`)}
             >
               {csv[rowIndex][columnIndex]}
             </Cell>
@@ -170,7 +166,7 @@ const Cell = ({
           : isSticky
           ? "#9f9f9f"
           : isHovering
-          ? "yellowgreen"
+          ? "gainsboro"
           : "white",
       }}
     >
@@ -183,4 +179,37 @@ function parseToCsv(raw: string): string[][] {
   const lines = raw.split("\n");
   const csv = lines.filter((l) => !!l).map((line) => line.split(","));
   return csv;
+}
+
+function csvToColumnWidths(csv: string[][]) {
+  const widths: number[] = [];
+  for (let j = 0; j < (csv[0]?.length ?? 0); j++) {
+    let max = 0;
+    for (let i = 0; i < csv.length; i++) {
+      max = Math.max(max, csv[i][j].length);
+    }
+    widths.push(max);
+  }
+  return widths;
+}
+
+function findSearchResults(search: string, csv: string[][]) {
+  const results: SearchResult[] = [];
+
+  for (let rowIndex = 0; rowIndex < csv.length; rowIndex++) {
+    for (
+      let columnIndex = 0;
+      columnIndex < csv[rowIndex].length;
+      columnIndex++
+    ) {
+      if (csv[rowIndex][columnIndex].includes(search)) {
+        results.push({
+          rowIndex: rowIndex,
+          columnIndex: columnIndex,
+        });
+      }
+    }
+  }
+
+  return results;
 }
