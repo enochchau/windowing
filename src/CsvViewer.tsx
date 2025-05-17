@@ -5,6 +5,7 @@ import { useWindowSize } from "./useWindowSize";
 
 import { useMemo, useState } from "react";
 import { demoRawCsv } from "./demoRawCsv";
+import React from "react";
 
 type SearchResult = {
   columnIndex: number;
@@ -148,32 +149,34 @@ interface CellProps {
   found?: boolean;
   isHovering: boolean;
 }
-const Cell = ({
-  isHovering,
-  isSticky,
-  children,
-  highlight,
-  found,
-}: CellProps) => {
-  return (
-    <div
-      className={css.cell}
-      style={{
-        background: highlight
-          ? "yellow"
-          : found
-          ? "pink"
-          : isSticky
-          ? "#9f9f9f"
-          : isHovering
-          ? "gainsboro"
-          : "white",
-      }}
-    >
-      {children}
-    </div>
-  );
-};
+const Cell = React.memo(
+  ({
+    isHovering,
+    isSticky,
+    children,
+    highlight,
+    found,
+  }: CellProps) => {
+    return (
+      <div
+        className={css.cell}
+        style={{
+          background: highlight
+            ? "yellow"
+            : found
+            ? "pink"
+            : isSticky
+            ? "#9f9f9f"
+            : isHovering
+            ? "gainsboro"
+            : "white",
+        }}
+      >
+        {children}
+      </div>
+    );
+  }
+);
 
 function parseToCsv(raw: string): string[][] {
   const lines = raw.split("\n");
