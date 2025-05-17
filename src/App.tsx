@@ -3,10 +3,11 @@ import css from "./App.module.css";
 import { GridDemo } from "./GridDemo";
 import { ListDemo } from "./ListDemo";
 import { CsvViewer } from "./CsvViewer";
+import { useHashLocation } from "wouter/use-hash-location";
 
 export function App() {
   return (
-    <Router base="/windowing">
+    <Router hook={useHashLocation}>
       <Nav />
       <Switch>
         <Route path="/" component={Demo} />
