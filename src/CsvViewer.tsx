@@ -4,8 +4,9 @@ import { VirtualGrid } from "./lib/VirtualGrid";
 import { AutoSizer } from "./lib/AutoSizer";
 import { useAutoSizer } from "./lib/useAutoSizer";
 import { CsvModal } from "./CsvModal";
+import { SearchBar } from "./SearchBar";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 import { demoRawCsv } from "./demoRawCsv";
 import React from "react";
 
@@ -19,6 +20,7 @@ const scrollOpts = { block: "center", inline: "center" } as const;
 export function CsvViewer() {
   const [search, setSearch] = useState("");
   const [searchResultIndex, setSearchResultIndex] = useState<number>(0);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [textAreaValue, setTextAreaValue] = useState(demoRawCsv);
   const [fixedColumns, setFixedColumns] = useState("0");
   const [fixedRows, setFixedRows] = useState("1");
@@ -57,13 +59,22 @@ export function CsvViewer() {
     setTextAreaValue(csvData);
   };
 
-  const handleSearch: React.ChangeEventHandler<HTMLInputElement> = (e) => {
-    const search = e.currentTarget.value;
-    setSearch(search);
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
     setSearchResultIndex(0);
   };
 
-  const handleNext = () => {
+  const handleSearchOpen = () => {
+    setIsSearchOpen(true);
+  };
+
+  const handleSearchClose = useCallback(() => {
+    setIsSearchOpen(false);
+    setSearch("");
+    setSearchResultIndex(0);
+  }, []);
+
+  const handleNext = useCallback(() => {
     let nextIndex = searchResultIndex + 1;
     if (nextIndex > searchResults.length - 1) {
       nextIndex = 0;
@@ -71,9 +82,9 @@ export function CsvViewer() {
     setSearchResultIndex(nextIndex);
     const args = searchResults[nextIndex];
     if (args) scrollToCell(args, scrollOpts);
-  };
+  }, [searchResultIndex, searchResults, scrollToCell]);
   
-  const handlePrev = () => {
+  const handlePrev = useCallback(() => {
     let nextIndex = searchResultIndex - 1;
     if (nextIndex < 0) {
       nextIndex = searchResults.length - 1;
@@ -81,7 +92,39 @@ export function CsvViewer() {
     setSearchResultIndex(nextIndex);
     const args = searchResults[nextIndex];
     if (args) scrollToCell(args, scrollOpts);
-  };
+  }, [searchResultIndex, searchResults, scrollToCell]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Cmd+F or Ctrl+F to open/close search
+      if ((e.metaKey || e.ctrlKey) && e.key === "f") {
+        e.preventDefault();
+        if (isSearchOpen) {
+          handleSearchClose();
+        } else {
+          handleSearchOpen();
+        }
+      }
+      // Cmd+G or F3 for next result
+      else if (((e.metaKey || e.ctrlKey) && e.key === "g" && !e.shiftKey) || e.key === "F3") {
+        e.preventDefault();
+        if (isSearchOpen && searchResults.length > 0) {
+          handleNext();
+        }
+      }
+      // Cmd+Shift+G or Shift+F3 for previous result
+      else if (((e.metaKey || e.ctrlKey) && e.key === "g" && e.shiftKey) || (e.key === "F3" && e.shiftKey)) {
+        e.preventDefault();
+        if (isSearchOpen && searchResults.length > 0) {
+          handlePrev();
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isSearchOpen, searchResults.length, handleNext, handlePrev, handleSearchClose]);
 
   return (
     <div className={css["container"]}>
@@ -89,12 +132,6 @@ export function CsvViewer() {
         <button onClick={() => setIsModalOpen(true)}>
           Import CSV
         </button>
-        <label>
-          search {searchResultIndex} / {searchResults.length}
-          <input value={search} onChange={handleSearch} />
-        </label>
-        <button onClick={handlePrev}>prev</button>
-        <button onClick={handleNext}>next</button>
         <label>
           fixed rows
           <input
@@ -115,6 +152,16 @@ export function CsvViewer() {
         </label>
       </div>
       <div className={css["grid-container"]}>
+        <SearchBar
+          isOpen={isSearchOpen}
+          search={search}
+          currentIndex={searchResultIndex}
+          totalResults={searchResults.length}
+          onSearchChange={handleSearchChange}
+          onNext={handleNext}
+          onPrev={handlePrev}
+          onClose={handleSearchClose}
+        />
         <AutoSizer autoSizerRef={autoSizerRef}>
           {isReady && dimensions.width > 0 && dimensions.height > 0 ? (
             <VirtualGrid
