@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from "react";
+import { Search, ChevronLeft, ChevronRight, X } from "lucide-react";
 import css from "./SearchBar.module.css";
 
 interface SearchBarProps {
@@ -49,12 +50,7 @@ export function SearchBar({
   return (
     <div className={css.container}>
       <div className={css.searchIcon}>
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path
-            d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"
-            fill="currentColor"
-          />
-        </svg>
+        <Search size={16} />
       </div>
       
       <input
@@ -80,15 +76,7 @@ export function SearchBar({
           className={css.navButton}
           title="Previous result (Shift+Enter)"
         >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path
-              d="M10 4l-4 4 4 4"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <ChevronLeft size={16} />
         </button>
         
         <button
@@ -97,15 +85,7 @@ export function SearchBar({
           className={css.navButton}
           title="Next result (Enter)"
         >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path
-              d="M6 4l4 4-4 4"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <ChevronRight size={16} />
         </button>
       </div>
       
@@ -114,15 +94,7 @@ export function SearchBar({
         className={css.closeButton}
         title="Close (Escape)"
       >
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path
-            d="M12 4L4 12M4 4l8 8"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <X size={16} />
       </button>
     </div>
   );

@@ -5,11 +5,14 @@ import { AutoSizer } from "./lib/AutoSizer";
 import { useAutoSizer } from "./lib/useAutoSizer";
 import { CsvModal } from "./CsvModal";
 import { SearchBar } from "./SearchBar";
-import { Button, Popover, Settings, SettingsIcon } from "./components";
 
 import { useMemo, useState, useEffect, useCallback } from "react";
 import { demoRawCsv } from "./demoRawCsv";
 import React from "react";
+import { Button } from "./components/Button";
+import { SettingsIcon } from "lucide-react";
+import { Settings } from "./components/Settings";
+import { Popover } from "./components/Popover";
 
 type SearchResult = {
   columnIndex: number;
@@ -84,7 +87,7 @@ export function CsvViewer() {
     const args = searchResults[nextIndex];
     if (args) scrollToCell(args, scrollOpts);
   }, [searchResultIndex, searchResults, scrollToCell]);
-  
+
   const handlePrev = useCallback(() => {
     let nextIndex = searchResultIndex - 1;
     if (nextIndex < 0) {
@@ -108,14 +111,20 @@ export function CsvViewer() {
         }
       }
       // Cmd+G or F3 for next result
-      else if (((e.metaKey || e.ctrlKey) && e.key === "g" && !e.shiftKey) || e.key === "F3") {
+      else if (
+        ((e.metaKey || e.ctrlKey) && e.key === "g" && !e.shiftKey) ||
+        e.key === "F3"
+      ) {
         e.preventDefault();
         if (isSearchOpen && searchResults.length > 0) {
           handleNext();
         }
       }
       // Cmd+Shift+G or Shift+F3 for previous result
-      else if (((e.metaKey || e.ctrlKey) && e.key === "g" && e.shiftKey) || (e.key === "F3" && e.shiftKey)) {
+      else if (
+        ((e.metaKey || e.ctrlKey) && e.key === "g" && e.shiftKey) ||
+        (e.key === "F3" && e.shiftKey)
+      ) {
         e.preventDefault();
         if (isSearchOpen && searchResults.length > 0) {
           handlePrev();
@@ -125,7 +134,13 @@ export function CsvViewer() {
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isSearchOpen, searchResults.length, handleNext, handlePrev, handleSearchClose]);
+  }, [
+    isSearchOpen,
+    searchResults.length,
+    handleNext,
+    handlePrev,
+    handleSearchClose,
+  ]);
 
   return (
     <div className={css["container"]}>
@@ -137,7 +152,7 @@ export function CsvViewer() {
         >
           Import CSV
         </Button>
-        
+
         <Popover
           placement="bottom-end"
           trigger={
@@ -173,13 +188,19 @@ export function CsvViewer() {
               columnOverflow={3}
               rowHover
               columnHover
-              itemRenderer={({ isHovering, isSticky, rowIndex, columnIndex }) => (
+              itemRenderer={({
+                isHovering,
+                isSticky,
+                rowIndex,
+                columnIndex,
+              }) => (
                 <Cell
                   isSticky={isSticky}
                   isHovering={isHovering}
                   highlight={
                     rowIndex === searchResults[searchResultIndex]?.rowIndex &&
-                    columnIndex === searchResults[searchResultIndex]?.columnIndex
+                    columnIndex ===
+                      searchResults[searchResultIndex]?.columnIndex
                   }
                   found={searchResultsSet.has(`${rowIndex};${columnIndex}`)}
                 >
@@ -192,7 +213,7 @@ export function CsvViewer() {
           )}
         </AutoSizer>
       </div>
-      
+
       <CsvModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -211,13 +232,7 @@ interface CellProps {
   isHovering: boolean;
 }
 const Cell = React.memo(
-  ({
-    isHovering,
-    isSticky,
-    children,
-    highlight,
-    found,
-  }: CellProps) => {
+  ({ isHovering, isSticky, children, highlight, found }: CellProps) => {
     return (
       <div
         className={css.cell}
