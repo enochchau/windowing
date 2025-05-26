@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type {
   NumberOrNumberFn,
   Placer,
@@ -7,11 +7,11 @@ import type {
 } from "./types";
 import { usePlacer } from "./usePlacer";
 
-export type UseVirtualListArgs = {
-  height: number;
+export type UseVirtualListConfig = {
   itemCount: number;
   itemHeight: NumberOrNumberFn;
   stickyItemCount?: number;
+  height: number;
 };
 export type UseVirtualListReturn = {
   listProps: {
@@ -33,8 +33,10 @@ export type UseVirtualListReturn = {
   scrollToItem: ScrollToItem;
 };
 
-export function useVirtualList(args: UseVirtualListArgs): UseVirtualListReturn {
-  const { stickyItemCount, height: outerHeight, itemCount } = args;
+export function useVirtualList(
+  config: UseVirtualListConfig
+): UseVirtualListReturn {
+  const { height: outerHeight, stickyItemCount, itemCount } = config;
 
   const outerRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
@@ -43,18 +45,19 @@ export function useVirtualList(args: UseVirtualListArgs): UseVirtualListReturn {
     placer,
     getDimension: getItemHeight,
     sum: innerHeight,
-  } = usePlacer(args.itemHeight, itemCount);
+  } = usePlacer(config.itemHeight, itemCount);
 
   const [visibleIndex, setVisibleIndex] = useState({
     start: 0,
     end: placer.placementToIndex(outerHeight),
   });
 
-  const onOuterScroll: React.UIEventHandler<HTMLDivElement> = useCallback(
-    (e) => {
-      const outerEl = e.currentTarget;
+  const onOuterScroll = useCallback(
+    () => {
+      const outerEl = outerRef.current;
+      if (!outerEl) return;
       const top = outerEl.scrollTop;
-      const bottom = top + e.currentTarget.clientHeight;
+      const bottom = top + outerEl.clientHeight;
 
       const start = placer.placementToIndex(top);
       const end = placer.placementToIndex(bottom);
@@ -62,6 +65,12 @@ export function useVirtualList(args: UseVirtualListArgs): UseVirtualListReturn {
     },
     [placer]
   );
+
+  // Update visible indices when dimensions change
+  useEffect(() => {
+    onOuterScroll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [outerHeight]);
 
   const scrollToItem: ScrollToItem = useCallback(
     (index, opts) => {

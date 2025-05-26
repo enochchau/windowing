@@ -34,10 +34,10 @@ export function VirtualGrid(props: VirtualGridProps) {
     stickyRowCount,
     rowHover = false,
     columnHover = false,
-    rowOverflow = 0,
+    rowOverflow = 3,
     rowCount,
     columnCount,
-    columnOverflow = 0,
+    columnOverflow = 3,
   } = props;
   const [mouseOverIndex, setMouseOverIndex] = useState<{
     row: number;

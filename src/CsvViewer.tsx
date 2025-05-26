@@ -1,11 +1,18 @@
 import { useVirtualGrid } from "./lib/useVirtualGrid";
 import css from "./CsvViewer.module.css";
 import { VirtualGrid } from "./lib/VirtualGrid";
-import { useWindowSize } from "./useWindowSize";
+import { AutoSizer } from "./lib/AutoSizer";
+import { useAutoSizer } from "./lib/useAutoSizer";
+import { CsvModal } from "./CsvModal";
+import { SearchBar } from "./SearchBar";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 import { demoRawCsv } from "./demoRawCsv";
 import React from "react";
+import { Button } from "./components/Button";
+import { SettingsIcon } from "lucide-react";
+import { Settings } from "./components/Settings";
+import { Popover } from "./components/Popover";
 
 type SearchResult = {
   columnIndex: number;
@@ -15,12 +22,15 @@ type SearchResult = {
 const scrollOpts = { block: "center", inline: "center" } as const;
 
 export function CsvViewer() {
-  const { height, width } = useWindowSize();
   const [search, setSearch] = useState("");
   const [searchResultIndex, setSearchResultIndex] = useState<number>(0);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [textAreaValue, setTextAreaValue] = useState(demoRawCsv);
   const [fixedColumns, setFixedColumns] = useState("0");
   const [fixedRows, setFixedRows] = useState("1");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const { ref: autoSizerRef, dimensions, isReady } = useAutoSizer();
 
   const csv = useMemo(() => parseToCsv(textAreaValue), [textAreaValue]);
 
@@ -39,8 +49,8 @@ export function CsvViewer() {
     }, [search, csv]);
 
   const { gridProps, scrollToCell } = useVirtualGrid({
-    height: height - 132,
-    width: width - 48,
+    height: dimensions.height,
+    width: dimensions.width,
     rowCount: csv.length,
     columnCount: csv[0]?.length ?? 0,
     rowHeight: 40,
@@ -49,19 +59,26 @@ export function CsvViewer() {
     stickyColumnCount: parseInt(fixedColumns),
   });
 
-  const handleTextAreaChange: React.ChangeEventHandler<HTMLTextAreaElement> = (
-    e
-  ) => {
-    setTextAreaValue(e.currentTarget.value);
+  const handleCsvImport = (csvData: string) => {
+    setTextAreaValue(csvData);
   };
 
-  const handleSearch: React.ChangeEventHandler<HTMLInputElement> = (e) => {
-    const search = e.currentTarget.value;
-    setSearch(search);
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
     setSearchResultIndex(0);
   };
 
-  const handleNext = () => {
+  const handleSearchOpen = () => {
+    setIsSearchOpen(true);
+  };
+
+  const handleSearchClose = useCallback(() => {
+    setIsSearchOpen(false);
+    setSearch("");
+    setSearchResultIndex(0);
+  }, []);
+
+  const handleNext = useCallback(() => {
     let nextIndex = searchResultIndex + 1;
     if (nextIndex > searchResults.length - 1) {
       nextIndex = 0;
@@ -69,8 +86,9 @@ export function CsvViewer() {
     setSearchResultIndex(nextIndex);
     const args = searchResults[nextIndex];
     if (args) scrollToCell(args, scrollOpts);
-  };
-  const handlePrev = () => {
+  }, [searchResultIndex, searchResults, scrollToCell]);
+
+  const handlePrev = useCallback(() => {
     let nextIndex = searchResultIndex - 1;
     if (nextIndex < 0) {
       nextIndex = searchResults.length - 1;
@@ -78,66 +96,130 @@ export function CsvViewer() {
     setSearchResultIndex(nextIndex);
     const args = searchResults[nextIndex];
     if (args) scrollToCell(args, scrollOpts);
-  };
+  }, [searchResultIndex, searchResults, scrollToCell]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Cmd+F or Ctrl+F to open/close search
+      if ((e.metaKey || e.ctrlKey) && e.key === "f") {
+        e.preventDefault();
+        if (isSearchOpen) {
+          handleSearchClose();
+        } else {
+          handleSearchOpen();
+        }
+      }
+      // Cmd+G or F3 for next result
+      else if (
+        ((e.metaKey || e.ctrlKey) && e.key === "g" && !e.shiftKey) ||
+        e.key === "F3"
+      ) {
+        e.preventDefault();
+        if (isSearchOpen && searchResults.length > 0) {
+          handleNext();
+        }
+      }
+      // Cmd+Shift+G or Shift+F3 for previous result
+      else if (
+        ((e.metaKey || e.ctrlKey) && e.key === "g" && e.shiftKey) ||
+        (e.key === "F3" && e.shiftKey)
+      ) {
+        e.preventDefault();
+        if (isSearchOpen && searchResults.length > 0) {
+          handlePrev();
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [
+    isSearchOpen,
+    searchResults.length,
+    handleNext,
+    handlePrev,
+    handleSearchClose,
+  ]);
 
   return (
     <div className={css["container"]}>
       <div className={css["control-container"]}>
-        <label>
-          csv
-          <textarea
-            style={{ resize: "none" }}
-            onChange={handleTextAreaChange}
-            value={textAreaValue}
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => setIsModalOpen(true)}
+        >
+          Import CSV
+        </Button>
+
+        <Popover
+          placement="bottom-end"
+          trigger={
+            <Button variant="ghost" size="sm">
+              <SettingsIcon size={14} />
+            </Button>
+          }
+        >
+          <Settings
+            fixedRows={fixedRows}
+            fixedColumns={fixedColumns}
+            onFixedRowsChange={setFixedRows}
+            onFixedColumnsChange={setFixedColumns}
           />
-        </label>
-        <label>
-          search {searchResultIndex} / {searchResults.length}
-          <input value={search} onChange={handleSearch} />
-        </label>
-        <button onClick={handlePrev}>prev</button>
-        <button onClick={handleNext}>next</button>
-        <label>
-          fixed rows
-          <input
-            min={0}
-            type="number"
-            value={fixedRows}
-            onChange={(e) => setFixedRows(e.currentTarget.value)}
-          />
-        </label>
-        <label>
-          fixed columns
-          <input
-            min={0}
-            type="number"
-            value={fixedColumns}
-            onChange={(e) => setFixedColumns(e.currentTarget.value)}
-          ></input>
-        </label>
+        </Popover>
       </div>
       <div className={css["grid-container"]}>
-        <VirtualGrid
-          {...gridProps}
-          rowOverflow={3}
-          columnOverflow={3}
-          rowHover
-          columnHover
-          itemRenderer={({ isHovering, isSticky, rowIndex, columnIndex }) => (
-            <Cell
-              isSticky={isSticky}
-              isHovering={isHovering}
-              highlight={
-                rowIndex === searchResults[searchResultIndex]?.rowIndex &&
-                columnIndex === searchResults[searchResultIndex]?.columnIndex
-              }
-              found={searchResultsSet.has(`${rowIndex};${columnIndex}`)}
-            >
-              {csv[rowIndex][columnIndex]}
-            </Cell>
-          )}
+        <SearchBar
+          isOpen={isSearchOpen}
+          search={search}
+          currentIndex={searchResultIndex}
+          totalResults={searchResults.length}
+          onSearchChange={handleSearchChange}
+          onNext={handleNext}
+          onPrev={handlePrev}
+          onClose={handleSearchClose}
         />
+        <AutoSizer autoSizerRef={autoSizerRef}>
+          {isReady && dimensions.width > 0 && dimensions.height > 0 ? (
+            <VirtualGrid
+              {...gridProps}
+              rowOverflow={3}
+              columnOverflow={3}
+              rowHover
+              columnHover
+              itemRenderer={({
+                isHovering,
+                isSticky,
+                rowIndex,
+                columnIndex,
+              }) => (
+                <Cell
+                  isSticky={isSticky}
+                  isHovering={isHovering}
+                  highlight={
+                    rowIndex === searchResults[searchResultIndex]?.rowIndex &&
+                    columnIndex ===
+                      searchResults[searchResultIndex]?.columnIndex
+                  }
+                  found={searchResultsSet.has(`${rowIndex};${columnIndex}`)}
+                >
+                  {csv[rowIndex][columnIndex]}
+                </Cell>
+              )}
+            />
+          ) : (
+            <div>Loading...</div>
+          )}
+        </AutoSizer>
       </div>
+
+      <CsvModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleCsvImport}
+        initialValue={textAreaValue}
+      />
     </div>
   );
 }
@@ -150,13 +232,7 @@ interface CellProps {
   isHovering: boolean;
 }
 const Cell = React.memo(
-  ({
-    isHovering,
-    isSticky,
-    children,
-    highlight,
-    found,
-  }: CellProps) => {
+  ({ isHovering, isSticky, children, highlight, found }: CellProps) => {
     return (
       <div
         className={css.cell}

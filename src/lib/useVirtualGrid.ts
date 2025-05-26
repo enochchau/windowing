@@ -5,9 +5,10 @@ import type {
   VisibleGridIndex,
 } from "./types";
 import { usePlacer } from "./usePlacer";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState, useEffect } from "react";
 
-export interface UseVirtualGridArgs {
+// Legacy interface for backward compatibility
+export type UseVirtualGridConfig = {
   height: number;
   width: number;
   rowCount: number;
@@ -16,7 +17,7 @@ export interface UseVirtualGridArgs {
   rowHeight: NumberOrNumberFn;
   stickyColumnCount?: number;
   stickyRowCount?: number;
-}
+};
 
 export interface UseVirtualGridReturn {
   gridProps: {
@@ -44,15 +45,19 @@ export interface UseVirtualGridReturn {
   scrollToCell: ScrollToCell;
 }
 
-export function useVirtualGrid(args: UseVirtualGridArgs): UseVirtualGridReturn {
+// Implementation
+export function useVirtualGrid(
+  config: UseVirtualGridConfig
+): UseVirtualGridReturn {
   const {
-    height: outerHeight,
     width: outerWidth,
+    height: outerHeight,
     rowCount,
     columnCount,
     stickyColumnCount,
     stickyRowCount,
-  } = args;
+  } = config;
+
   const outerRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
 
@@ -60,13 +65,13 @@ export function useVirtualGrid(args: UseVirtualGridArgs): UseVirtualGridReturn {
     getDimension: getColumnWidth,
     placer: columnPlacer,
     sum: columnWidthsSum,
-  } = usePlacer(args.columnWidth, columnCount);
+  } = usePlacer(config.columnWidth, columnCount);
 
   const {
     placer: rowPlacer,
     sum: rowHeightsSum,
     getDimension: getRowHeight,
-  } = usePlacer(args.rowHeight, rowCount);
+  } = usePlacer(config.rowHeight, rowCount);
 
   const [visibleIndex, setVisibleIndex] = useState<VisibleGridIndex>({
     column: {
@@ -76,26 +81,30 @@ export function useVirtualGrid(args: UseVirtualGridArgs): UseVirtualGridReturn {
     row: { start: 0, end: rowPlacer.placementToIndex(outerHeight) },
   });
 
-  const onOuterScroll: React.UIEventHandler<HTMLDivElement> = useCallback(
-    (e) => {
-      const outerEl = e.currentTarget;
-      const top = outerEl.scrollTop;
-      const bottom = top + outerEl.clientHeight;
-      const left = outerEl.scrollLeft;
-      const right = left + outerEl.clientWidth;
+  // Update visible indices when dimensions change
+  useEffect(() => {
+    onOuterScroll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [outerWidth, outerHeight]);
 
-      const row = {
-        start: rowPlacer.placementToIndex(top),
-        end: rowPlacer.placementToIndex(bottom),
-      };
-      const column = {
-        start: columnPlacer.placementToIndex(left),
-        end: columnPlacer.placementToIndex(right),
-      };
-      setVisibleIndex({ row: row, column: column });
-    },
-    [rowPlacer, columnPlacer]
-  );
+  const onOuterScroll = useCallback(() => {
+    const outerEl = outerRef.current;
+    if (!outerEl) return;
+    const top = outerEl.scrollTop;
+    const bottom = top + outerEl.clientHeight;
+    const left = outerEl.scrollLeft;
+    const right = left + outerEl.clientWidth;
+
+    const row = {
+      start: rowPlacer.placementToIndex(top),
+      end: rowPlacer.placementToIndex(bottom),
+    };
+    const column = {
+      start: columnPlacer.placementToIndex(left),
+      end: columnPlacer.placementToIndex(right),
+    };
+    setVisibleIndex({ row: row, column: column });
+  }, [rowPlacer, columnPlacer]);
 
   const scrollToCell: ScrollToCell = useCallback(
     (args, opts) => {
