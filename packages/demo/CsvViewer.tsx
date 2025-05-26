@@ -1,8 +1,5 @@
-import { useVirtualGrid } from "./lib/useVirtualGrid";
+import { useVirtualGrid, VirtualGrid, AutoSizer, useAutoSizer } from "@windowing/core";
 import css from "./CsvViewer.module.css";
-import { VirtualGrid } from "./lib/VirtualGrid";
-import { AutoSizer } from "./lib/AutoSizer";
-import { useAutoSizer } from "./lib/useAutoSizer";
 import { CsvModal } from "./CsvModal";
 import { SearchBar } from "./SearchBar";
 

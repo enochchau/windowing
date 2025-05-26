@@ -7,10 +7,68 @@ settings:
 importers:
 
   .:
+    devDependencies:
+      '@eslint/js':
+        specifier: ^9.26.0
+        version: 9.26.0
+      '@types/react':
+        specifier: ^19.1.4
+        version: 19.1.4
+      '@types/react-dom':
+        specifier: ^19.1.5
+        version: 19.1.5(@types/react@19.1.4)
+      '@vitejs/plugin-react':
+        specifier: ^4.4.1
+        version: 4.4.1(vite@6.3.5)
+      eslint:
+        specifier: ^9.26.0
+        version: 9.26.0
+      eslint-plugin-react-hooks:
+        specifier: ^5.2.0
+        version: 5.2.0(eslint@9.26.0)
+      eslint-plugin-react-refresh:
+        specifier: ^0.4.20
+        version: 0.4.20(eslint@9.26.0)
+      globals:
+        specifier: ^16.1.0
+        version: 16.1.0
+      typescript:
+        specifier: ~5.8.3
+        version: 5.8.3
+      typescript-eslint:
+        specifier: ^8.32.1
+        version: 8.32.1(eslint@9.26.0)(typescript@5.8.3)
+      vite:
+        specifier: ^6.3.5
+        version: 6.3.5
+
+  packages/core:
+    dependencies:
+      react:
+        specifier: ^19.1.0
+        version: 19.1.0
+      react-dom:
+        specifier: ^19.1.0
+        version: 19.1.0(react@19.1.0)
+    devDependencies:
+      '@types/react':
+        specifier: ^19.1.4
+        version: 19.1.4
+      '@types/react-dom':
+        specifier: ^19.1.5
+        version: 19.1.5(@types/react@19.1.4)
+      typescript:
+        specifier: ~5.8.3
+        version: 5.8.3
+
+  packages/demo:
     dependencies:
       '@floating-ui/react':
         specifier: ^0.27.9
         version: 0.27.9(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@windowing/core':
+        specifier: workspace:*
+        version: link:../core
       lucide-react:
         specifier: ^0.511.0
         version: 0.511.0(react@19.1.0)

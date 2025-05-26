@@ -2,8 +2,6 @@
 
 A React virtualization library with demo applications, built as a pnpm workspace.
 
-https://enochchau.github.io/windowing/
-
 ## Packages
 
 ### `@windowing/core`
@@ -35,6 +33,18 @@ pnpm dev
 pnpm build
 ```
 
+## Workspace Structure
+
+```
+packages/
+├── core/          # @windowing/core - Core virtualization library
+│   ├── src/       # TypeScript source files
+│   └── dist/      # Built files
+└── demo/          # @windowing/demo - Demo application
+    ├── src/       # Demo app source files
+    └── dist/      # Built demo app
+```
+
 ## Features
 
 - Sticky leading rows and columns
@@ -44,6 +54,6 @@ pnpm build
 - TypeScript support
 - Performance optimized for large datasets
 
-## Roadmap
+## Live Demo
 
-- [ ] Sticky grid sections
+https://enochchau.github.io/windowing/

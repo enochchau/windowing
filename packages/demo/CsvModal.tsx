@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { Modal } from "./lib/Modal";
+import { Modal } from "@windowing/core";
 import css from "./CsvModal.module.css";
 
 interface CsvModalProps {

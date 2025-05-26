@@ -1,6 +1,5 @@
 import { ListItem } from "./ListItem";
-import { VirtualGrid } from "./lib/VirtualGrid";
-import { useVirtualGrid } from "./lib/useVirtualGrid";
+import { VirtualGrid, useVirtualGrid } from "@windowing/core";
 import css from "./GridDemo.module.css";
 import { useState } from "react";
 

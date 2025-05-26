@@ -1,17 +1,22 @@
 {
-  "name": "windowing",
+  "name": "@windowing/demo",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "pnpm --filter @windowing/demo dev",
-    "build": "pnpm --filter @windowing/core build && pnpm --filter @windowing/demo build",
-    "build:core": "pnpm --filter @windowing/core build",
-    "build:demo": "pnpm --filter @windowing/demo build",
-    "lint": "pnpm --filter @windowing/demo lint",
-    "preview": "pnpm --filter @windowing/demo preview"
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@windowing/core": "workspace:*",
+    "@floating-ui/react": "^0.27.9",
+    "lucide-react": "^0.511.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "wouter": "^3.7.0"
+  },
   "devDependencies": {
     "@eslint/js": "^9.26.0",
     "@types/react": "^19.1.4",
