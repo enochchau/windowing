@@ -2,6 +2,10 @@
   padding: 8px 16px;
   background: white;
   color: black;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
 }
 
 .cell {
@@ -13,7 +17,9 @@
 }
 
 .grid-container {
-   border: 1px solid #c0c0c0; 
+   border: 1px solid #c0c0c0;
+   flex: 1;
+   overflow: hidden;
 }
 
 .control-container {

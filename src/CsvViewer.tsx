@@ -1,7 +1,8 @@
 import { useVirtualGrid } from "./lib/useVirtualGrid";
 import css from "./CsvViewer.module.css";
 import { VirtualGrid } from "./lib/VirtualGrid";
-import { useWindowSize } from "./useWindowSize";
+import { AutoSizer } from "./lib/AutoSizer";
+import { useAutoSizer } from "./lib/useAutoSizer";
 
 import { useMemo, useState } from "react";
 import { demoRawCsv } from "./demoRawCsv";
@@ -15,12 +16,13 @@ type SearchResult = {
 const scrollOpts = { block: "center", inline: "center" } as const;
 
 export function CsvViewer() {
-  const { height, width } = useWindowSize();
   const [search, setSearch] = useState("");
   const [searchResultIndex, setSearchResultIndex] = useState<number>(0);
   const [textAreaValue, setTextAreaValue] = useState(demoRawCsv);
   const [fixedColumns, setFixedColumns] = useState("0");
   const [fixedRows, setFixedRows] = useState("1");
+
+  const { ref: autoSizerRef, dimensions, isReady } = useAutoSizer();
 
   const csv = useMemo(() => parseToCsv(textAreaValue), [textAreaValue]);
 
@@ -39,8 +41,8 @@ export function CsvViewer() {
     }, [search, csv]);
 
   const { gridProps, scrollToCell } = useVirtualGrid({
-    height: height - 132,
-    width: width - 48,
+    height: dimensions.height,
+    width: dimensions.width,
     rowCount: csv.length,
     columnCount: csv[0]?.length ?? 0,
     rowHeight: 40,
@@ -70,6 +72,7 @@ export function CsvViewer() {
     const args = searchResults[nextIndex];
     if (args) scrollToCell(args, scrollOpts);
   };
+  
   const handlePrev = () => {
     let nextIndex = searchResultIndex - 1;
     if (nextIndex < 0) {
@@ -117,26 +120,32 @@ export function CsvViewer() {
         </label>
       </div>
       <div className={css["grid-container"]}>
-        <VirtualGrid
-          {...gridProps}
-          rowOverflow={3}
-          columnOverflow={3}
-          rowHover
-          columnHover
-          itemRenderer={({ isHovering, isSticky, rowIndex, columnIndex }) => (
-            <Cell
-              isSticky={isSticky}
-              isHovering={isHovering}
-              highlight={
-                rowIndex === searchResults[searchResultIndex]?.rowIndex &&
-                columnIndex === searchResults[searchResultIndex]?.columnIndex
-              }
-              found={searchResultsSet.has(`${rowIndex};${columnIndex}`)}
-            >
-              {csv[rowIndex][columnIndex]}
-            </Cell>
+        <AutoSizer autoSizerRef={autoSizerRef}>
+          {isReady && dimensions.width > 0 && dimensions.height > 0 ? (
+            <VirtualGrid
+              {...gridProps}
+              rowOverflow={3}
+              columnOverflow={3}
+              rowHover
+              columnHover
+              itemRenderer={({ isHovering, isSticky, rowIndex, columnIndex }) => (
+                <Cell
+                  isSticky={isSticky}
+                  isHovering={isHovering}
+                  highlight={
+                    rowIndex === searchResults[searchResultIndex]?.rowIndex &&
+                    columnIndex === searchResults[searchResultIndex]?.columnIndex
+                  }
+                  found={searchResultsSet.has(`${rowIndex};${columnIndex}`)}
+                >
+                  {csv[rowIndex][columnIndex]}
+                </Cell>
+              )}
+            />
+          ) : (
+            <div>Loading...</div>
           )}
-        />
+        </AutoSizer>
       </div>
     </div>
   );

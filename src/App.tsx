@@ -7,13 +7,17 @@ import { useHashLocation } from "wouter/use-hash-location";
 
 export function App() {
   return (
-    <Router hook={useHashLocation}>
-      <Nav />
-      <Switch>
-        <Route path="/" component={Demo} />
-        <Route path="/csv" component={CsvViewer} />
-      </Switch>
-    </Router>
+    <div className={css["max-flex"]}>
+      <Router hook={useHashLocation}>
+        <Nav />
+        <div className={css["fill-rest"]}>
+          <Switch>
+            <Route path="/" component={Demo} />
+            <Route path="/csv" component={CsvViewer} />
+          </Switch>
+        </div>
+      </Router>
+    </div>
   );
 }
 
