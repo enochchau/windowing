@@ -24,7 +24,12 @@
 }
 
 .control-container {
-    display:flex;
-    flex-wrap: wrap;
+    display: flex;
+    align-items: center;
     gap: 8px;
+    padding: 8px 12px;
+    background: #f1f3f4;
+    border-bottom: 1px solid #dadce0;
+    margin-bottom: 6px;
+    border-radius: 4px;
 }

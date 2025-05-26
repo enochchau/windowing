@@ -5,6 +5,7 @@ import { AutoSizer } from "./lib/AutoSizer";
 import { useAutoSizer } from "./lib/useAutoSizer";
 import { CsvModal } from "./CsvModal";
 import { SearchBar } from "./SearchBar";
+import { Button, Popover, Settings, SettingsIcon } from "./components";
 
 import { useMemo, useState, useEffect, useCallback } from "react";
 import { demoRawCsv } from "./demoRawCsv";
@@ -129,27 +130,29 @@ export function CsvViewer() {
   return (
     <div className={css["container"]}>
       <div className={css["control-container"]}>
-        <button onClick={() => setIsModalOpen(true)}>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => setIsModalOpen(true)}
+        >
           Import CSV
-        </button>
-        <label>
-          fixed rows
-          <input
-            min={0}
-            type="number"
-            value={fixedRows}
-            onChange={(e) => setFixedRows(e.currentTarget.value)}
+        </Button>
+        
+        <Popover
+          placement="bottom-end"
+          trigger={
+            <Button variant="ghost" size="sm">
+              <SettingsIcon size={14} />
+            </Button>
+          }
+        >
+          <Settings
+            fixedRows={fixedRows}
+            fixedColumns={fixedColumns}
+            onFixedRowsChange={setFixedRows}
+            onFixedColumnsChange={setFixedColumns}
           />
-        </label>
-        <label>
-          fixed columns
-          <input
-            min={0}
-            type="number"
-            value={fixedColumns}
-            onChange={(e) => setFixedColumns(e.currentTarget.value)}
-          ></input>
-        </label>
+        </Popover>
       </div>
       <div className={css["grid-container"]}>
         <SearchBar
