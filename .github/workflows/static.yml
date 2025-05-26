@@ -13,38 +13,38 @@ permissions:
 
 # Allow one concurrent deployment
 concurrency:
-  group: 'pages'
+  group: "pages"
   cancel-in-progress: true
 
 jobs:
   # Quality checks job
   quality-checks:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 9
-          
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
-          cache: 'pnpm'
-          
+          cache: "pnpm"
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-        
+
       - name: Type check core package
         run: pnpm --filter @windowing/core type-check
-        
+
       - name: Lint core package
         run: pnpm --filter @windowing/core lint
-        
+
       - name: Format check core package
         run: pnpm --filter @windowing/core format:check
 
@@ -60,28 +60,28 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 9
-          
+
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
-          cache: 'pnpm'
+          cache: "pnpm"
       - name: Install dependencies
         run: pnpm install
-      - name: Build
-        run: pnpm run build
+      - name: Build demo package
+        run: pnpm run build:demo
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload dist folder
-          path: './dist'
+          # Upload demo dist folder
+          path: "./packages/demo/dist"
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
