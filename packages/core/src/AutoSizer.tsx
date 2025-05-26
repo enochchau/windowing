@@ -1,7 +1,7 @@
 import React from "react";
 
 interface AutoSizerProps {
-  autoSizerRef: React.RefObject<HTMLDivElement>;
+  autoSizerRef: React.RefObject<HTMLDivElement | null>;
   children: React.ReactNode;
   className?: string;
   style?: React.CSSProperties;
