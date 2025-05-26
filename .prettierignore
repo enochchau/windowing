@@ -1,0 +1,6 @@
+dist/
+node_modules/
+*.d.ts
+!src/**/*.d.ts
+package-lock.json
+pnpm-lock.yaml

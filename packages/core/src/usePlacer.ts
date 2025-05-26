@@ -13,14 +13,13 @@ export function usePlacer(itemDimension: NumberOrNumberFn, count: number) {
     return {
       placer: placer,
       sum: sum(dimensions),
-      getDimension: (index:number) => dimensions[index],
+      getDimension: (index: number) => dimensions[index],
     };
   }, [itemDimension, count]);
 }
 
 function numberOrFnToFn(nfn: NumberOrNumberFn): (index: number) => number {
   if (typeof nfn === "number") {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     return (_index: number) => nfn;
   }
 

@@ -11,14 +11,14 @@ interface ButtonProps {
   className?: string;
 }
 
-export function Button({ 
-  children, 
-  onClick, 
-  variant = "secondary", 
-  size = "md", 
+export function Button({
+  children,
+  onClick,
+  variant = "secondary",
+  size = "md",
   disabled = false,
   className,
-  ...props 
+  ...props
 }: ButtonProps) {
   return (
     <button

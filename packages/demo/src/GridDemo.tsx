@@ -46,7 +46,7 @@ export function GridDemo() {
           <input
             type="checkbox"
             checked={enableSticky}
-            onChange={(e) => setEnableSticky(e.currentTarget.checked)}
+            onChange={e => setEnableSticky(e.currentTarget.checked)}
           />
         </label>
         <button
@@ -99,8 +99,7 @@ export function GridDemo() {
               isHovering={isHovering}
               style={{
                 backgroundColor:
-                  rowIndex === scrollRowIndex &&
-                  columnIndex === scrollColumnIndex
+                  rowIndex === scrollRowIndex && columnIndex === scrollColumnIndex
                     ? "yellow"
                     : undefined,
               }}

@@ -1,10 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type {
-  NumberOrNumberFn,
-  Placer,
-  ScrollToItem,
-  VisibleIndex,
-} from "./types";
+import type { NumberOrNumberFn, Placer, ScrollToItem, VisibleIndex } from "./types";
 import { usePlacer } from "./usePlacer";
 
 export type UseVirtualListConfig = {
@@ -33,9 +28,7 @@ export type UseVirtualListReturn = {
   scrollToItem: ScrollToItem;
 };
 
-export function useVirtualList(
-  config: UseVirtualListConfig
-): UseVirtualListReturn {
+export function useVirtualList(config: UseVirtualListConfig): UseVirtualListReturn {
   const { height: outerHeight, stickyItemCount, itemCount } = config;
 
   const outerRef = useRef<HTMLDivElement>(null);
@@ -52,19 +45,18 @@ export function useVirtualList(
     end: placer.placementToIndex(outerHeight),
   });
 
-  const onOuterScroll = useCallback(
-    () => {
-      const outerEl = outerRef.current;
-      if (!outerEl) return;
-      const top = outerEl.scrollTop;
-      const bottom = top + outerEl.clientHeight;
+  const onOuterScroll = useCallback(() => {
+    const outerEl = outerRef.current;
+    if (!outerEl) {
+      return;
+    }
+    const top = outerEl.scrollTop;
+    const bottom = top + outerEl.clientHeight;
 
-      const start = placer.placementToIndex(top);
-      const end = placer.placementToIndex(bottom);
-      setVisibleIndex({ start, end });
-    },
-    [placer]
-  );
+    const start = placer.placementToIndex(top);
+    const end = placer.placementToIndex(bottom);
+    setVisibleIndex({ start, end });
+  }, [placer]);
 
   // Update visible indices when dimensions change
   useEffect(() => {
@@ -74,7 +66,9 @@ export function useVirtualList(
 
   const scrollToItem: ScrollToItem = useCallback(
     (index, opts) => {
-      if (!outerRef.current) return;
+      if (!outerRef.current) {
+        return;
+      }
 
       let top = placer.indexToPlacement(index);
       if (opts?.block === "center") {
@@ -82,9 +76,7 @@ export function useVirtualList(
       } else if (opts?.block === "end") {
         top = top - (outerHeight - getItemHeight(index));
       } else {
-        const stickyOffset = stickyItemCount
-          ? placer.indexToPlacement(stickyItemCount)
-          : 0;
+        const stickyOffset = stickyItemCount ? placer.indexToPlacement(stickyItemCount) : 0;
         top = top - stickyOffset;
       }
 

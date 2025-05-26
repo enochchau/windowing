@@ -1,9 +1,4 @@
-import type {
-  NumberOrNumberFn,
-  Placer,
-  ScrollToCell,
-  VisibleGridIndex,
-} from "./types";
+import type { NumberOrNumberFn, Placer, ScrollToCell, VisibleGridIndex } from "./types";
 import { usePlacer } from "./usePlacer";
 import { useCallback, useRef, useState, useEffect } from "react";
 
@@ -46,9 +41,7 @@ export interface UseVirtualGridReturn {
 }
 
 // Implementation
-export function useVirtualGrid(
-  config: UseVirtualGridConfig
-): UseVirtualGridReturn {
+export function useVirtualGrid(config: UseVirtualGridConfig): UseVirtualGridReturn {
   const {
     width: outerWidth,
     height: outerHeight,
@@ -89,7 +82,9 @@ export function useVirtualGrid(
 
   const onOuterScroll = useCallback(() => {
     const outerEl = outerRef.current;
-    if (!outerEl) return;
+    if (!outerEl) {
+      return;
+    }
     const top = outerEl.scrollTop;
     const bottom = top + outerEl.clientHeight;
     const left = outerEl.scrollLeft;
@@ -108,7 +103,9 @@ export function useVirtualGrid(
 
   const scrollToCell: ScrollToCell = useCallback(
     (args, opts) => {
-      if (!outerRef.current) return;
+      if (!outerRef.current) {
+        return;
+      }
 
       let top = rowPlacer.indexToPlacement(args.rowIndex);
       if (opts?.block === "center") {

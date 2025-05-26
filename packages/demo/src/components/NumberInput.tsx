@@ -9,14 +9,7 @@ interface NumberInputProps {
   placeholder?: string;
 }
 
-export function NumberInput({ 
-  label, 
-  value, 
-  onChange, 
-  min, 
-  max, 
-  placeholder 
-}: NumberInputProps) {
+export function NumberInput({ label, value, onChange, min, max, placeholder }: NumberInputProps) {
   return (
     <div className={css.container}>
       <label className={css.label}>{label}</label>
@@ -24,7 +17,7 @@ export function NumberInput({
         type="number"
         className={css.input}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={e => onChange(e.target.value)}
         min={min}
         max={max}
         placeholder={placeholder}

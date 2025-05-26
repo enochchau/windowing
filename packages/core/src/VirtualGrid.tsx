@@ -47,10 +47,7 @@ export function VirtualGrid(props: VirtualGridProps) {
   const rowStart = Math.max(0, visibleIndex.row.start - rowOverflow);
   const rowEnd = Math.min(rowCount - 1, visibleIndex.row.end + rowOverflow);
   const colStart = Math.max(0, visibleIndex.column.start - columnOverflow);
-  const colEnd = Math.min(
-    columnCount - 1,
-    visibleIndex.column.end + columnOverflow
-  );
+  const colEnd = Math.min(columnCount - 1, visibleIndex.column.end + columnOverflow);
   const stickyRowLeft = getColumnPlacement(stickyColumnCount);
   const stickyColumnTop = getRowPlacement(stickyRowCount);
 
@@ -72,8 +69,8 @@ export function VirtualGrid(props: VirtualGridProps) {
         mouseOverIndex,
       });
 
-      const top = getRowPlacement(rowI) 
-      const left = getColumnPlacement(colJ) 
+      const top = getRowPlacement(rowI);
+      const left = getColumnPlacement(colJ);
       items.push(
         <div
           key={`${rowI}:${colJ}`}
@@ -97,7 +94,9 @@ export function VirtualGrid(props: VirtualGridProps) {
   }
 
   const handleItemMouseEnter = (args: { row: number; column: number }) => {
-    if (!rowHover && !columnHover) return;
+    if (!rowHover && !columnHover) {
+      return;
+    }
     setMouseOverIndex(args);
   };
 
@@ -149,7 +148,9 @@ export function VirtualGrid(props: VirtualGridProps) {
   for (let rowI = rowStart; rowI <= rowEnd; rowI++) {
     for (let colJ = 0; colJ < stickyColumnCount; colJ++) {
       const key = `${rowI}:${colJ}`;
-      if (placed.has(key)) continue;
+      if (placed.has(key)) {
+        continue;
+      }
 
       const isHovering = checkHovering({
         colJ,
@@ -187,7 +188,9 @@ export function VirtualGrid(props: VirtualGridProps) {
   for (let rowI = 0; rowI < stickyRowCount; rowI++) {
     for (let colJ = colStart; colJ <= colEnd; colJ++) {
       const key = `${rowI}:${colJ}`;
-      if (placed.has(key)) continue;
+      if (placed.has(key)) {
+        continue;
+      }
 
       const isHovering = checkHovering({
         colJ,
@@ -229,10 +232,7 @@ export function VirtualGrid(props: VirtualGridProps) {
       onScroll={onOuterScroll}
       onMouseLeave={onMouseLeaveOuterEl}
     >
-      <div
-        style={{ position: "relative", height: innerHeight, width: innerWidth }}
-        ref={innerRef}
-      >
+      <div style={{ position: "relative", height: innerHeight, width: innerWidth }} ref={innerRef}>
         {items}
         {/* sticky rows container has to come first */}
         {stickyRows.length > 0 && (
@@ -297,7 +297,6 @@ function checkHovering({
 }) {
   return !!(
     mouseOverIndex &&
-    ((rowHover && rowI === mouseOverIndex.row) ||
-      (columnHover && colJ === mouseOverIndex.column))
+    ((rowHover && rowI === mouseOverIndex.row) || (columnHover && colJ === mouseOverIndex.column))
   );
 }

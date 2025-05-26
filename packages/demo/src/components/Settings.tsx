@@ -18,12 +18,7 @@ export function Settings({
     <div className={css.container}>
       <h4 className={css.title}>Grid Settings</h4>
       <div className={css.inputGroup}>
-        <NumberInput
-          label="Fixed Rows"
-          value={fixedRows}
-          onChange={onFixedRowsChange}
-          min={0}
-        />
+        <NumberInput label="Fixed Rows" value={fixedRows} onChange={onFixedRowsChange} min={0} />
       </div>
       <div className={css.inputGroup}>
         <NumberInput

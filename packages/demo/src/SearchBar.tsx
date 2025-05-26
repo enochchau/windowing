@@ -52,23 +52,23 @@ export function SearchBar({
       <div className={css.searchIcon}>
         <Search size={16} />
       </div>
-      
+
       <input
         ref={inputRef}
         type="text"
         value={search}
-        onChange={(e) => onSearchChange(e.target.value)}
+        onChange={e => onSearchChange(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder="Find in sheet"
         className={css.input}
       />
-      
+
       {totalResults > 0 && (
         <div className={css.resultCounter}>
           {displayIndex} of {totalResults}
         </div>
       )}
-      
+
       <div className={css.navigation}>
         <button
           onClick={onPrev}
@@ -78,7 +78,7 @@ export function SearchBar({
         >
           <ChevronLeft size={16} />
         </button>
-        
+
         <button
           onClick={onNext}
           disabled={totalResults === 0}
@@ -88,12 +88,8 @@ export function SearchBar({
           <ChevronRight size={16} />
         </button>
       </div>
-      
-      <button
-        onClick={onClose}
-        className={css.closeButton}
-        title="Close (Escape)"
-      >
+
+      <button onClick={onClose} className={css.closeButton} title="Close (Escape)">
         <X size={16} />
       </button>
     </div>

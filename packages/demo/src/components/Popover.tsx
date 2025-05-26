@@ -16,7 +16,15 @@ import css from "./Popover.module.css";
 interface PopoverProps {
   trigger: React.ReactNode;
   children: React.ReactNode;
-  placement?: "top" | "bottom" | "left" | "right" | "top-start" | "top-end" | "bottom-start" | "bottom-end";
+  placement?:
+    | "top"
+    | "bottom"
+    | "left"
+    | "right"
+    | "top-start"
+    | "top-end"
+    | "bottom-start"
+    | "bottom-end";
 }
 
 export function Popover({ trigger, children, placement = "bottom" }: PopoverProps) {
@@ -25,7 +33,7 @@ export function Popover({ trigger, children, placement = "bottom" }: PopoverProp
 
   const { refs, floatingStyles, context } = useFloating({
     open: isOpen,
-    onOpenChange: (open) => {
+    onOpenChange: open => {
       setIsOpen(open);
       if (!open) {
         setIsPositioned(false);
@@ -46,11 +54,7 @@ export function Popover({ trigger, children, placement = "bottom" }: PopoverProp
   const dismiss = useDismiss(context);
   const role = useRole(context);
 
-  const { getReferenceProps, getFloatingProps } = useInteractions([
-    click,
-    dismiss,
-    role,
-  ]);
+  const { getReferenceProps, getFloatingProps } = useInteractions([click, dismiss, role]);
 
   // Track when positioning is complete to prevent flash
   useEffect(() => {
@@ -64,7 +68,7 @@ export function Popover({ trigger, children, placement = "bottom" }: PopoverProp
       <div ref={refs.setReference} {...getReferenceProps()} className={css.trigger}>
         {trigger}
       </div>
-      
+
       {isOpen && (
         <FloatingPortal>
           <div
@@ -76,9 +80,7 @@ export function Popover({ trigger, children, placement = "bottom" }: PopoverProp
             {...getFloatingProps()}
             className={css.popover}
           >
-            <div className={css.content}>
-              {children}
-            </div>
+            <div className={css.content}>{children}</div>
           </div>
         </FloatingPortal>
       )}

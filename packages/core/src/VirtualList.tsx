@@ -66,7 +66,7 @@ export function VirtualList(props: VirtualListProps) {
             height: getItemHeight(i),
             width: "100%",
             transform: `translateY(${top}px)`,
-            position: 'absolute'
+            position: "absolute",
           }}
         >
           {itemRenderer({ isSticky: true, index: i })}

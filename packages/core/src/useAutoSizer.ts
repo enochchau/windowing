@@ -20,7 +20,9 @@ export function useAutoSizer(): UseAutoSizerReturn {
   const [isReady, setIsReady] = useState(false);
 
   const updateDimensions = useCallback(() => {
-    if (!ref.current) return;
+    if (!ref.current) {
+      return;
+    }
 
     const { width, height } = ref.current.getBoundingClientRect();
     setDimensions({ width, height });
@@ -29,13 +31,15 @@ export function useAutoSizer(): UseAutoSizerReturn {
 
   useEffect(() => {
     const element = ref.current;
-    if (!element) return;
+    if (!element) {
+      return;
+    }
 
     // Initial measurement
     updateDimensions();
 
     // Set up ResizeObserver for efficient resize detection
-    const resizeObserver = new ResizeObserver((entries) => {
+    const resizeObserver = new ResizeObserver(entries => {
       for (const entry of entries) {
         const { width, height } = entry.contentRect;
         setDimensions({ width, height });

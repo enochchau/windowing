@@ -10,13 +10,13 @@ interface ModalProps {
   closeOnOverlayClick?: boolean;
 }
 
-export function Modal({ 
-  isOpen, 
-  onClose, 
-  title, 
-  children, 
+export function Modal({
+  isOpen,
+  onClose,
+  title,
+  children,
   footer,
-  closeOnOverlayClick = true 
+  closeOnOverlayClick = true,
 }: ModalProps) {
   if (!isOpen) return null;
 
@@ -33,8 +33,8 @@ export function Modal({
   };
 
   return (
-    <div 
-      className={css.overlay} 
+    <div
+      className={css.overlay}
       onClick={handleOverlayClick}
       onKeyDown={handleKeyDown}
       tabIndex={-1}
@@ -48,16 +48,10 @@ export function Modal({
             </button>
           </div>
         )}
-        
-        <div className={css.content}>
-          {children}
-        </div>
 
-        {footer && (
-          <div className={css.footer}>
-            {footer}
-          </div>
-        )}
+        <div className={css.content}>{children}</div>
+
+        {footer && <div className={css.footer}>{footer}</div>}
       </div>
     </div>
   );

@@ -26,7 +26,7 @@ export function CsvModal({ isOpen, onClose, onSubmit, initialValue = "" }: CsvMo
     const file = e.target.files?.[0];
     if (file && file.type === "text/csv") {
       const reader = new FileReader();
-      reader.onload = (event) => {
+      reader.onload = event => {
         const content = event.target?.result as string;
         setCsvData(content);
       };
@@ -41,8 +41,8 @@ export function CsvModal({ isOpen, onClose, onSubmit, initialValue = "" }: CsvMo
       <button type="button" onClick={onClose} className={css["cancel-button"]}>
         Cancel
       </button>
-      <button 
-        type="submit" 
+      <button
+        type="submit"
         form="csvForm"
         className={css["submit-button"]}
         disabled={!csvData.trim()}
@@ -53,12 +53,7 @@ export function CsvModal({ isOpen, onClose, onSubmit, initialValue = "" }: CsvMo
   );
 
   return (
-    <Modal 
-      isOpen={isOpen} 
-      onClose={onClose} 
-      title="Import CSV Data"
-      footer={footer}
-    >
+    <Modal isOpen={isOpen} onClose={onClose} title="Import CSV Data" footer={footer}>
       <form id="csvForm" onSubmit={handleSubmit}>
         <div className={css["input-method-selector"]}>
           <label>
@@ -66,7 +61,7 @@ export function CsvModal({ isOpen, onClose, onSubmit, initialValue = "" }: CsvMo
               type="radio"
               value="paste"
               checked={inputMethod === "paste"}
-              onChange={(e) => setInputMethod(e.target.value as "paste")}
+              onChange={e => setInputMethod(e.target.value as "paste")}
             />
             Paste CSV text
           </label>
@@ -75,7 +70,7 @@ export function CsvModal({ isOpen, onClose, onSubmit, initialValue = "" }: CsvMo
               type="radio"
               value="upload"
               checked={inputMethod === "upload"}
-              onChange={(e) => setInputMethod(e.target.value as "upload")}
+              onChange={e => setInputMethod(e.target.value as "upload")}
             />
             Upload CSV file
           </label>
@@ -88,7 +83,7 @@ export function CsvModal({ isOpen, onClose, onSubmit, initialValue = "" }: CsvMo
               id="csvTextArea"
               className={css["text-area"]}
               value={csvData}
-              onChange={(e) => setCsvData(e.target.value)}
+              onChange={e => setCsvData(e.target.value)}
               placeholder="Paste your CSV data here..."
               rows={10}
             />
@@ -108,14 +103,15 @@ export function CsvModal({ isOpen, onClose, onSubmit, initialValue = "" }: CsvMo
               <div className={css["preview-container"]}>
                 <p>File loaded successfully. Preview:</p>
                 <div className={css.preview}>
-                  {csvData.split('\n').slice(0, 5).map((line, index) => (
-                    <div key={index} className={css["preview-line"]}>
-                      {line}
-                    </div>
-                  ))}
-                  {csvData.split('\n').length > 5 && (
-                    <div className={css["preview-line"]}>...</div>
-                  )}
+                  {csvData
+                    .split("\n")
+                    .slice(0, 5)
+                    .map((line, index) => (
+                      <div key={index} className={css["preview-line"]}>
+                        {line}
+                      </div>
+                    ))}
+                  {csvData.split("\n").length > 5 && <div className={css["preview-line"]}>...</div>}
                 </div>
               </div>
             )}
