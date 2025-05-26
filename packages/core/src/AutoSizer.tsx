@@ -7,7 +7,12 @@ interface AutoSizerProps {
   style?: React.CSSProperties;
 }
 
-export function AutoSizer({ autoSizerRef, children, className, style }: AutoSizerProps) {
+export function AutoSizer({
+  autoSizerRef,
+  children,
+  className,
+  style,
+}: AutoSizerProps) {
   return (
     <div
       ref={autoSizerRef}

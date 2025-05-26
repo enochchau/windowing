@@ -1,4 +1,9 @@
-import type { NumberOrNumberFn, Placer, ScrollToCell, VisibleGridIndex } from "./types";
+import type {
+  NumberOrNumberFn,
+  Placer,
+  ScrollToCell,
+  VisibleGridIndex,
+} from "./types";
 import { usePlacer } from "./usePlacer";
 import { useCallback, useRef, useState, useEffect } from "react";
 
@@ -41,7 +46,9 @@ export interface UseVirtualGridReturn {
 }
 
 // Implementation
-export function useVirtualGrid(config: UseVirtualGridConfig): UseVirtualGridReturn {
+export function useVirtualGrid(
+  config: UseVirtualGridConfig,
+): UseVirtualGridReturn {
   const {
     width: outerWidth,
     height: outerHeight,
@@ -144,7 +151,7 @@ export function useVirtualGrid(config: UseVirtualGridConfig): UseVirtualGridRetu
       outerWidth,
       getColumnWidth,
       getRowHeight,
-    ]
+    ],
   );
 
   return {

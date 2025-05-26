@@ -57,7 +57,7 @@ export function SearchBar({
         ref={inputRef}
         type="text"
         value={search}
-        onChange={e => onSearchChange(e.target.value)}
+        onChange={(e) => onSearchChange(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder="Find in sheet"
         className={css.input}
@@ -89,7 +89,11 @@ export function SearchBar({
         </button>
       </div>
 
-      <button onClick={onClose} className={css.closeButton} title="Close (Escape)">
+      <button
+        onClick={onClose}
+        className={css.closeButton}
+        title="Close (Escape)"
+      >
         <X size={16} />
       </button>
     </div>

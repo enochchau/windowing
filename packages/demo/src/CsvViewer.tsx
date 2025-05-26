@@ -1,11 +1,15 @@
-import { useVirtualGrid, VirtualGrid, AutoSizer, useAutoSizer } from "@windowing/core";
+import {
+  useVirtualGrid,
+  VirtualGrid,
+  AutoSizer,
+  useAutoSizer,
+} from "@windowing/core";
 import css from "./CsvViewer.module.css";
 import { CsvModal } from "./CsvModal";
 import { SearchBar } from "./SearchBar";
 
-import { useMemo, useState, useEffect, useCallback } from "react";
+import { useMemo, useState, useEffect, useCallback, memo } from "react";
 import { demoRawCsv } from "./demoRawCsv";
-import React from "react";
 import { Button } from "./components/Button";
 import { SettingsIcon } from "lucide-react";
 import { Settings } from "./components/Settings";
@@ -33,16 +37,19 @@ export function CsvViewer() {
 
   const columnWidths = useMemo(() => csvToColumnWidths(csv), [csv]);
 
-  const { results: searchResults, resultSet: searchResultsSet } = useMemo(() => {
-    if (!search) {
-      return { results: [], resultSet: new Set() };
-    }
-    const results = findSearchResults(search, csv);
-    const resultSet = new Set(
-      results.map(({ columnIndex, rowIndex }) => `${rowIndex};${columnIndex}`)
-    );
-    return { results, resultSet };
-  }, [search, csv]);
+  const { results: searchResults, resultSet: searchResultsSet } =
+    useMemo(() => {
+      if (!search) {
+        return { results: [], resultSet: new Set() };
+      }
+      const results = findSearchResults(search, csv);
+      const resultSet = new Set(
+        results.map(
+          ({ columnIndex, rowIndex }) => `${rowIndex};${columnIndex}`,
+        ),
+      );
+      return { results, resultSet };
+    }, [search, csv]);
 
   const { gridProps, scrollToCell } = useVirtualGrid({
     height: dimensions.height,
@@ -50,7 +57,7 @@ export function CsvViewer() {
     rowCount: csv.length,
     columnCount: csv[0]?.length ?? 0,
     rowHeight: 40,
-    columnWidth: ci => columnWidths[ci] * 10,
+    columnWidth: (ci) => columnWidths[ci] * 10,
     stickyRowCount: parseInt(fixedRows),
     stickyColumnCount: parseInt(fixedColumns),
   });
@@ -81,7 +88,9 @@ export function CsvViewer() {
     }
     setSearchResultIndex(nextIndex);
     const args = searchResults[nextIndex];
-    if (args) scrollToCell(args, scrollOpts);
+    if (args) {
+      scrollToCell(args, scrollOpts);
+    }
   }, [searchResultIndex, searchResults, scrollToCell]);
 
   const handlePrev = useCallback(() => {
@@ -91,7 +100,9 @@ export function CsvViewer() {
     }
     setSearchResultIndex(nextIndex);
     const args = searchResults[nextIndex];
-    if (args) scrollToCell(args, scrollOpts);
+    if (args) {
+      scrollToCell(args, scrollOpts);
+    }
   }, [searchResultIndex, searchResults, scrollToCell]);
 
   // Keyboard shortcuts
@@ -107,7 +118,10 @@ export function CsvViewer() {
         }
       }
       // Cmd+G or F3 for next result
-      else if (((e.metaKey || e.ctrlKey) && e.key === "g" && !e.shiftKey) || e.key === "F3") {
+      else if (
+        ((e.metaKey || e.ctrlKey) && e.key === "g" && !e.shiftKey) ||
+        e.key === "F3"
+      ) {
         e.preventDefault();
         if (isSearchOpen && searchResults.length > 0) {
           handleNext();
@@ -127,12 +141,22 @@ export function CsvViewer() {
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isSearchOpen, searchResults.length, handleNext, handlePrev, handleSearchClose]);
+  }, [
+    isSearchOpen,
+    searchResults.length,
+    handleNext,
+    handlePrev,
+    handleSearchClose,
+  ]);
 
   return (
     <div className={css["container"]}>
       <div className={css["control-container"]}>
-        <Button variant="secondary" size="sm" onClick={() => setIsModalOpen(true)}>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => setIsModalOpen(true)}
+        >
           Import CSV
         </Button>
 
@@ -171,13 +195,19 @@ export function CsvViewer() {
               columnOverflow={3}
               rowHover
               columnHover
-              itemRenderer={({ isHovering, isSticky, rowIndex, columnIndex }) => (
+              itemRenderer={({
+                isHovering,
+                isSticky,
+                rowIndex,
+                columnIndex,
+              }) => (
                 <Cell
                   isSticky={isSticky}
                   isHovering={isHovering}
                   highlight={
                     rowIndex === searchResults[searchResultIndex]?.rowIndex &&
-                    columnIndex === searchResults[searchResultIndex]?.columnIndex
+                    columnIndex ===
+                      searchResults[searchResultIndex]?.columnIndex
                   }
                   found={searchResultsSet.has(`${rowIndex};${columnIndex}`)}
                 >
@@ -208,30 +238,32 @@ interface CellProps {
   found?: boolean;
   isHovering: boolean;
 }
-const Cell = React.memo(({ isHovering, isSticky, children, highlight, found }: CellProps) => {
-  return (
-    <div
-      className={css.cell}
-      style={{
-        background: highlight
-          ? "yellow"
-          : found
-            ? "pink"
-            : isSticky
-              ? "#9f9f9f"
-              : isHovering
-                ? "gainsboro"
-                : "white",
-      }}
-    >
-      {children}
-    </div>
-  );
-});
+const Cell = memo(
+  ({ isHovering, isSticky, children, highlight, found }: CellProps) => {
+    return (
+      <div
+        className={css.cell}
+        style={{
+          background: highlight
+            ? "yellow"
+            : found
+              ? "pink"
+              : isSticky
+                ? "#9f9f9f"
+                : isHovering
+                  ? "gainsboro"
+                  : "white",
+        }}
+      >
+        {children}
+      </div>
+    );
+  },
+);
 
 function parseToCsv(raw: string): string[][] {
   const lines = raw.split("\n");
-  const csv = lines.filter(l => !!l).map(line => line.split(","));
+  const csv = lines.filter((l) => !!l).map((line) => line.split(","));
   return csv;
 }
 
@@ -251,7 +283,11 @@ function findSearchResults(search: string, csv: string[][]) {
   const results: SearchResult[] = [];
 
   for (let rowIndex = 0; rowIndex < csv.length; rowIndex++) {
-    for (let columnIndex = 0; columnIndex < csv[rowIndex].length; columnIndex++) {
+    for (
+      let columnIndex = 0;
+      columnIndex < csv[rowIndex].length;
+      columnIndex++
+    ) {
       if (csv[rowIndex][columnIndex].includes(search)) {
         results.push({
           rowIndex: rowIndex,

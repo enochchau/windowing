@@ -9,7 +9,7 @@ export function ListDemo() {
   const [enableSticky, setEnableSticky] = useState(true);
   const { listProps, scrollToItem } = useVirtualList({
     itemCount: itemData.length,
-    itemHeight: index => {
+    itemHeight: (index) => {
       if (index % 5 === 0) return 30;
       if (index % 2 === 0) return 40;
       return 50;
@@ -27,10 +27,12 @@ export function ListDemo() {
         <input
           type="checkbox"
           checked={enableSticky}
-          onChange={e => setEnableSticky(e.currentTarget.checked)}
+          onChange={(e) => setEnableSticky(e.currentTarget.checked)}
         />
       </label>
-      <button onClick={() => scrollToItem(scrollIndex)}>Scroll to {scrollIndex} - Start</button>
+      <button onClick={() => scrollToItem(scrollIndex)}>
+        Scroll to {scrollIndex} - Start
+      </button>
       <button onClick={() => scrollToItem(scrollIndex, { block: "center" })}>
         Scroll to {scrollIndex} - Center
       </button>

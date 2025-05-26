@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { NumberOrNumberFn, Placer, ScrollToItem, VisibleIndex } from "./types";
+import type {
+  NumberOrNumberFn,
+  Placer,
+  ScrollToItem,
+  VisibleIndex,
+} from "./types";
 import { usePlacer } from "./usePlacer";
 
 export type UseVirtualListConfig = {
@@ -28,7 +33,9 @@ export type UseVirtualListReturn = {
   scrollToItem: ScrollToItem;
 };
 
-export function useVirtualList(config: UseVirtualListConfig): UseVirtualListReturn {
+export function useVirtualList(
+  config: UseVirtualListConfig,
+): UseVirtualListReturn {
   const { height: outerHeight, stickyItemCount, itemCount } = config;
 
   const outerRef = useRef<HTMLDivElement>(null);
@@ -76,13 +83,15 @@ export function useVirtualList(config: UseVirtualListConfig): UseVirtualListRetu
       } else if (opts?.block === "end") {
         top = top - (outerHeight - getItemHeight(index));
       } else {
-        const stickyOffset = stickyItemCount ? placer.indexToPlacement(stickyItemCount) : 0;
+        const stickyOffset = stickyItemCount
+          ? placer.indexToPlacement(stickyItemCount)
+          : 0;
         top = top - stickyOffset;
       }
 
       outerRef.current.scrollTo({ top });
     },
-    [getItemHeight, placer, outerHeight, stickyItemCount]
+    [getItemHeight, placer, outerHeight, stickyItemCount],
   );
 
   return {

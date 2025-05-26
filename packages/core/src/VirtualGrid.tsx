@@ -47,7 +47,10 @@ export function VirtualGrid(props: VirtualGridProps) {
   const rowStart = Math.max(0, visibleIndex.row.start - rowOverflow);
   const rowEnd = Math.min(rowCount - 1, visibleIndex.row.end + rowOverflow);
   const colStart = Math.max(0, visibleIndex.column.start - columnOverflow);
-  const colEnd = Math.min(columnCount - 1, visibleIndex.column.end + columnOverflow);
+  const colEnd = Math.min(
+    columnCount - 1,
+    visibleIndex.column.end + columnOverflow,
+  );
   const stickyRowLeft = getColumnPlacement(stickyColumnCount);
   const stickyColumnTop = getRowPlacement(stickyRowCount);
 
@@ -88,7 +91,7 @@ export function VirtualGrid(props: VirtualGridProps) {
             rowIndex: rowI,
             columnIndex: colJ,
           })}
-        </div>
+        </div>,
       );
     }
   }
@@ -139,7 +142,7 @@ export function VirtualGrid(props: VirtualGridProps) {
             rowIndex: rowI,
             columnIndex: colJ,
           })}
-        </div>
+        </div>,
       );
     }
   }
@@ -179,7 +182,7 @@ export function VirtualGrid(props: VirtualGridProps) {
             rowIndex: rowI,
             columnIndex: colJ,
           })}
-        </div>
+        </div>,
       );
     }
   }
@@ -220,7 +223,7 @@ export function VirtualGrid(props: VirtualGridProps) {
             rowIndex: rowI,
             columnIndex: colJ,
           })}
-        </div>
+        </div>,
       );
     }
   }
@@ -232,7 +235,10 @@ export function VirtualGrid(props: VirtualGridProps) {
       onScroll={onOuterScroll}
       onMouseLeave={onMouseLeaveOuterEl}
     >
-      <div style={{ position: "relative", height: innerHeight, width: innerWidth }} ref={innerRef}>
+      <div
+        style={{ position: "relative", height: innerHeight, width: innerWidth }}
+        ref={innerRef}
+      >
         {items}
         {/* sticky rows container has to come first */}
         {stickyRows.length > 0 && (
@@ -297,6 +303,7 @@ function checkHovering({
 }) {
   return !!(
     mouseOverIndex &&
-    ((rowHover && rowI === mouseOverIndex.row) || (columnHover && colJ === mouseOverIndex.column))
+    ((rowHover && rowI === mouseOverIndex.row) ||
+      (columnHover && colJ === mouseOverIndex.column))
   );
 }

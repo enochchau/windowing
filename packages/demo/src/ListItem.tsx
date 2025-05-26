@@ -8,7 +8,12 @@ export interface ListItemProps {
   isHovering?: boolean;
   style?: React.CSSProperties;
 }
-export function ListItem({ style, isHovering, isSticky, children }: ListItemProps) {
+export function ListItem({
+  style,
+  isHovering,
+  isSticky,
+  children,
+}: ListItemProps) {
   return (
     <div
       style={style}

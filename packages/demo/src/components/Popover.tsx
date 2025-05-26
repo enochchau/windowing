@@ -27,13 +27,17 @@ interface PopoverProps {
     | "bottom-end";
 }
 
-export function Popover({ trigger, children, placement = "bottom" }: PopoverProps) {
+export function Popover({
+  trigger,
+  children,
+  placement = "bottom",
+}: PopoverProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isPositioned, setIsPositioned] = useState(false);
 
   const { refs, floatingStyles, context } = useFloating({
     open: isOpen,
-    onOpenChange: open => {
+    onOpenChange: (open) => {
       setIsOpen(open);
       if (!open) {
         setIsPositioned(false);
@@ -54,18 +58,30 @@ export function Popover({ trigger, children, placement = "bottom" }: PopoverProp
   const dismiss = useDismiss(context);
   const role = useRole(context);
 
-  const { getReferenceProps, getFloatingProps } = useInteractions([click, dismiss, role]);
+  const { getReferenceProps, getFloatingProps } = useInteractions([
+    click,
+    dismiss,
+    role,
+  ]);
 
   // Track when positioning is complete to prevent flash
   useEffect(() => {
-    if (isOpen && floatingStyles.left !== undefined && floatingStyles.top !== undefined) {
+    if (
+      isOpen &&
+      floatingStyles.left !== undefined &&
+      floatingStyles.top !== undefined
+    ) {
       setIsPositioned(true);
     }
   }, [isOpen, floatingStyles.left, floatingStyles.top]);
 
   return (
     <>
-      <div ref={refs.setReference} {...getReferenceProps()} className={css.trigger}>
+      <div
+        ref={refs.setReference}
+        {...getReferenceProps()}
+        className={css.trigger}
+      >
         {trigger}
       </div>
 

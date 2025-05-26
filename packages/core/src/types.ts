@@ -20,14 +20,14 @@ export type ScrollToCell = (
   opts?: {
     block?: ScrollPlacement;
     inline?: ScrollPlacement;
-  }
+  },
 ) => void;
 
 export type ScrollToItem = (
   index: number,
   opts?: {
     block: ScrollPlacement;
-  }
+  },
 ) => void;
 
 export type Placer = {

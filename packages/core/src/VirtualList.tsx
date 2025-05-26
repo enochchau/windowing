@@ -51,7 +51,7 @@ export function VirtualList(props: VirtualListProps) {
         }}
       >
         {itemRenderer({ isSticky: false, index: i })}
-      </div>
+      </div>,
     );
   }
 
@@ -70,7 +70,7 @@ export function VirtualList(props: VirtualListProps) {
           }}
         >
           {itemRenderer({ isSticky: true, index: i })}
-        </div>
+        </div>,
       );
     }
   }

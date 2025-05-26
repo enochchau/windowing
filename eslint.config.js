@@ -51,7 +51,7 @@ export default tseslint.config(
       "no-console": "warn",
       "no-debugger": "error",
       eqeqeq: ["error", "always"],
-      curly: ["error", "all"],
+      curly: ["off", "all"],
 
       // Import/export rules
       "no-duplicate-imports": "error",
