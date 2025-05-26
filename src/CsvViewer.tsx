@@ -3,6 +3,7 @@ import css from "./CsvViewer.module.css";
 import { VirtualGrid } from "./lib/VirtualGrid";
 import { AutoSizer } from "./lib/AutoSizer";
 import { useAutoSizer } from "./lib/useAutoSizer";
+import { CsvModal } from "./CsvModal";
 
 import { useMemo, useState } from "react";
 import { demoRawCsv } from "./demoRawCsv";
@@ -21,6 +22,7 @@ export function CsvViewer() {
   const [textAreaValue, setTextAreaValue] = useState(demoRawCsv);
   const [fixedColumns, setFixedColumns] = useState("0");
   const [fixedRows, setFixedRows] = useState("1");
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { ref: autoSizerRef, dimensions, isReady } = useAutoSizer();
 
@@ -51,10 +53,8 @@ export function CsvViewer() {
     stickyColumnCount: parseInt(fixedColumns),
   });
 
-  const handleTextAreaChange: React.ChangeEventHandler<HTMLTextAreaElement> = (
-    e
-  ) => {
-    setTextAreaValue(e.currentTarget.value);
+  const handleCsvImport = (csvData: string) => {
+    setTextAreaValue(csvData);
   };
 
   const handleSearch: React.ChangeEventHandler<HTMLInputElement> = (e) => {
@@ -86,14 +86,9 @@ export function CsvViewer() {
   return (
     <div className={css["container"]}>
       <div className={css["control-container"]}>
-        <label>
-          csv
-          <textarea
-            style={{ resize: "none" }}
-            onChange={handleTextAreaChange}
-            value={textAreaValue}
-          />
-        </label>
+        <button onClick={() => setIsModalOpen(true)}>
+          Import CSV
+        </button>
         <label>
           search {searchResultIndex} / {searchResults.length}
           <input value={search} onChange={handleSearch} />
@@ -147,6 +142,13 @@ export function CsvViewer() {
           )}
         </AutoSizer>
       </div>
+      
+      <CsvModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleCsvImport}
+        initialValue={textAreaValue}
+      />
     </div>
   );
 }
