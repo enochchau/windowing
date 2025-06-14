@@ -10,22 +10,26 @@ export function App() {
     <Router hook={useHashLocation}>
       <Nav />
       <Switch>
-        <Route path="/" component={Demo} />
+        <Route path="/" component={Grid} />
+        <Route path="/list" component={List} />
         <Route path="/csv" component={CsvViewer} />
       </Switch>
     </Router>
   );
 }
 
-const Demo = () => {
+const Grid = () => {
   return (
     <div className={css["app-container"]}>
-      <div>
-        <GridDemo />
-      </div>
-      <div>
-        <ListDemo />
-      </div>
+      <GridDemo />
+    </div>
+  );
+};
+
+const List = () => {
+  return (
+    <div className={css["app-container"]}>
+      <ListDemo />
     </div>
   );
 };
@@ -33,7 +37,8 @@ const Demo = () => {
 const Nav = () => {
   return (
     <nav className={css["nav-container"]}>
-      <Link href="/">Demo</Link>
+      <Link href="/">Grid Demo</Link>
+      <Link href="/list">List Demo</Link>
       <Link href="/csv">Csv Viewer</Link>
     </nav>
   );
